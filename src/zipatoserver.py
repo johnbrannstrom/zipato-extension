@@ -9,116 +9,154 @@ from flask import Flask
 from flask import request
 
 # The service will respond to requests on this port
-tcpPort = 5000
+TCP_PORT = 5000
 
 # The service will respons to requests on this HTTP path
-httpPath = '/'
+HTTP_PATH = '/'
 
 # Sets if debug mode should be used
 debug = False
 
 # Set if logging should be used
-logging = True
+LOGGING = True
 
 # Full path and name of log file
-logFileName = '/home/john/httpaction'
+LOG_FILE_NAME = '/home/john/httpaction'
 
 # Path to the wakeonlan command
-wakeonlanPath = '/usr/bin/'
+WAKEONLAN_PATH = '/usr/bin/'
 
 # Path to the ping command
-pingPath = '/bin/'
+PING_PATH = '/bin/'
 
 # Number of pings
-pingCount = 3
+PING_COUNT = 3
 
 # Path to the ssh command
-sshPath = '/usr/bin/'
+SSH_PATH = '/usr/bin/'
 
 # Path to ssh key directory
-sshKeyPath = '/home/john/.ssh/id_rsa'
+SSH_KEY_PATH = '/home/john/.ssh/id_rsa'
 
-httpaction = Flask(__name__)
+zipatoserver = Flask(__name__)
 
 
-class LogFile():
+class LogFile:
+    """Log file container."""
+
     def __init__(self, name):
+        """Initializes a LogFile instance."""
         self.file = open(name, 'a+')
 
     def write(self, message):
+        """
+        Write line to log file.
+
+        :param str message: Log message.
+
+        """
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         line = now + ' ' + message + '\n'
         self.file.write(line)
 
     def close(self):
+        """Close log file."""
         self.file.close()
 
 
-@httpaction.route(httpPath)
+@zipatoserver.route(HTTP_PATH)
 def index():
+    """Web server function."""
+
     def poweron():
-        if mac != None:
-            if host != None:
-                command = "{}wakeonlan -i {} {}".format(wakeonlanPath, host, mac)
+        """
+        Start remote node with a wake on LAN packet.
+
+        :rtype: str
+        :returns: Status message
+
+        """
+        if mac is not None:
+            if host is not None:
+                command = "{}wakeonlan -i {} {}"
+                command = command.format(WAKEONLAN_PATH, host, mac)
             else:
-                command = "{}wakeonlan {}".format(wakeonlanPath, mac)
+                command = "{}wakeonlan {}".format(WAKEONLAN_PATH, mac)
             for i in range(3):
                 p = subprocess.Popen(
                     command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     shell=True)
                 stdout, stderr = p.communicate()
                 sleep(0.1)
-            if logging:
-                logFile.write(command)
+            if LOGGING:
+                log_file.write(command)
             return stdout + stderr
         else:
             return "Action 'poweron' must have parameter 'mac'!"
 
     def poweroff():
-        if user != None and host != None:
+        """
+        Log on to remote node and shut it down.
+
+        .. note::
+
+            Password less login with SSH keys must be set up for this to work.
+
+        :rtype: str
+        :returns: Status message
+
+        """
+        if user is not None and host is not None:
             command = "{}ssh -i {} -T {}@{} 'shutdown -h now'"
-            command = command.format(sshPath, sshKeyPath, user, host)
+            command = command.format(SSH_PATH, SSH_KEY_PATH, user, host)
             p = subprocess.Popen(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True)
             stdout, stderr = p.communicate()
-            if logging:
-                logFile.write(command)
+            if LOGGING:
+                log_file.write(command)
             return stdout + stderr
-        elif user == None:
+        elif user is None:
             return "Action 'poweroff' must have parameter 'user'!"
-        elif host == None:
+        elif host is None:
             return "Action 'poweroff' must have parameter 'host'!"
 
     def ping():
-        if host != None:
-            for i in range(pingCount):
-                command = "{}ping -c {} {}".format(pingPath, str(pingCount), host)
+        """
+        Ping an IP address return the status.
+
+        :rtype: str
+        :returns: Status message
+
+        """
+        if host is not None:
+            for i in range(PING_COUNT):
+                command = "{}ping -c {} {}".format(PING_PATH, str(PING_COUNT), host)
                 p = subprocess.Popen(
                     command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     shell=True)
                 stdout, stderr = p.communicate()
-                if logging:
-                    logFile.write(command)
+                if LOGGING:
+                    log_file.write(command)
                 result = re.match('.*0 received.*', str(stdout), re.DOTALL)
-                pingOk = result == None
-                if pingOk:
+                ping_ok = result is None
+                if ping_ok:
                     break
                 sleep(5)
-            if serial != None and ep != None and apiKey != None:
+            if serial is not None and ep is not None and apikey is not None:
                 # Set the status of a Zipato sensor to the ping status
-                command = "https://my.zipato.com/zipato-web/remoting/attribute/set?serial={}&ep={}&apiKey={}&state={}"
-                if pingOk:
-                    command = command.format(serial, ep, apiKey, 'true')
+                command = "https://my.zipato.com/zipato-web/remoting/attribute/set?serial={}&ep={}&apikey={}&state={}"
+                if ping_ok:
+                    command = command.format(serial, ep, apikey, 'true')
                 else:
-                    command = command.format(serial, ep, apiKey, 'false')
+                    command = command.format(serial, ep, apikey, 'false')
                 r = requests.get(command)
-                if logging:
-                    logFile.write(command)
+                if LOGGING:
+                    log_file.write(command)
                 return str(r.status_code)
             else:
                 # Just return a the ping status
-                if pingOk:
+                if ping_ok:
                     return '1'
                 else:
                     return '0'
@@ -131,9 +169,9 @@ def index():
     host = request.args.get('host')
     serial = request.args.get('serial')
     ep = request.args.get('ep')
-    apiKey = request.args.get('apiKey')
-    if logging:
-        logFile = LogFile(logFileName)
+    apikey = request.args.get('apikey')
+    if LOGGING:
+        log_file = LogFile(LOG_FILE_NAME)
     if action.lower() == 'poweron':
         result = poweron()
     elif action.lower() == 'poweroff':
@@ -141,11 +179,13 @@ def index():
     elif action.lower() == 'ping':
         result = ping()
     else:
-        result = "Unknown value '{}' for paramater 'action'. Choose from 'poweron, poweroff, ping'!".format(action)
-    if logging:
-        logFile.close()
+        result = ("Unknown value '{}' for paramater 'action'. Choose from 'pow"
+                  "eron, poweroff, ping'!")
+        result = result.format(action)
+    if LOGGING:
+        log_file.close()
     return result
 
 
 if __name__ == '__main__':
-    httpaction.run(debug=debug, host='0.0.0.0', port=tcpPort, threaded=True)
+    zipatoserver.run(debug=debug, host='0.0.0.0', port=TCP_PORT, threaded=True)
