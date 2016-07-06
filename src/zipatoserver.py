@@ -11,10 +11,10 @@ from settings import Settings
 from logfile import LogFile
 
 
-class ZipatoServer:
+class ZipatoServer(Settings):
     """Zipato extension web server."""
 
-    def poweron(self):
+    def _poweron(self):
         """
         Start remote node with a wake on LAN packet.
 
@@ -150,10 +150,10 @@ class ZipatoServer:
         args = parser.parse_args()
         return args
 
-
     def run(self):
         """Run the web server."""
         args = self._parse_command_line_options()
+        Settings.load_settings_from_yaml()
         Settings.DEBUG = args.debug
         zipatoserver.run(
             debug=Settings.DEBUG,

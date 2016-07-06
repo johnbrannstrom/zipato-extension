@@ -15,7 +15,8 @@ import yaml
 class Settings:
     """Settings container."""
 
-    def load_settings_from_yaml(self):
+    @staticmethod
+    def load_settings_from_yaml():
         """Set all system constants from YAML file."""
         with open('zipatoserver.conf', 'r') as f:
             constants = yaml.load(f)
