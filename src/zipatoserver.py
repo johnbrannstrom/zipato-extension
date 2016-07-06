@@ -3,33 +3,13 @@
 import subprocess
 import requests
 import re
-import datetime
+import argparse
 from time import sleep
 from flask import Flask
 from flask import request
 from settings import Settings
+from logfile import LogFile
 
-class LogFile:
-    """Log file container."""
-
-    def __init__(self, name):
-        """Initializes a LogFile instance."""
-        self.file = open(name, 'a+')
-
-    def write(self, message):
-        """
-        Write line to log file.
-
-        :param str message: Log message.
-
-        """
-        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        line = now + ' ' + message + '\n'
-        self.file.write(line)
-
-    def close(self):
-        """Close log file."""
-        self.file.close()
 
 class ZipatoServer:
     """Zipato extension web server."""
@@ -154,9 +134,27 @@ class ZipatoServer:
             log_file.close()
         return result
 
+    @staticmethod
+    def _parse_command_line_options():
+        """
+        Parse options from the command line.
+
+        :rtype: Namespace
+
+        """
+        debug_help = 'Debugging on or off.'
+        description = 'Start Zipato extension web server.'
+        parser = argparse.ArgumentParser(description=description)
+        parser.add_argument('--debug', type=bool,
+                            help=debug_help, required=False)
+        args = parser.parse_args()
+        return args
+
 
     def run(self):
         """Run the web server."""
+        args = self._parse_command_line_options()
+        Settings.DEBUG = args.debug
         zipatoserver.run(
             debug=Settings.DEBUG,
             host='0.0.0.0',
