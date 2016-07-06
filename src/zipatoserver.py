@@ -7,39 +7,7 @@ import datetime
 from time import sleep
 from flask import Flask
 from flask import request
-
-# The service will respond to requests on this port
-TCP_PORT = 5000
-
-# The service will respons to requests on this HTTP path
-HTTP_PATH = '/'
-
-# Sets if debug mode should be used
-debug = False
-
-# Set if logging should be used
-LOGGING = True
-
-# Full path and name of log file
-LOG_FILE_NAME = '/home/john/httpaction'
-
-# Path to the wakeonlan command
-WAKEONLAN_PATH = '/usr/bin/'
-
-# Path to the ping command
-PING_PATH = '/bin/'
-
-# Number of pings
-PING_COUNT = 3
-
-# Path to the ssh command
-SSH_PATH = '/usr/bin/'
-
-# Path to ssh key directory
-SSH_KEY_PATH = '/home/john/.ssh/id_rsa'
-
-zipatoserver = Flask(__name__)
-
+from settings import Settings
 
 class LogFile:
     """Log file container."""
@@ -63,12 +31,10 @@ class LogFile:
         """Close log file."""
         self.file.close()
 
+class ZipatoServer:
+    """Zipato extension web server."""
 
-@zipatoserver.route(HTTP_PATH)
-def index():
-    """Web server function."""
-
-    def poweron():
+    def poweron(self):
         """
         Start remote node with a wake on LAN packet.
 
@@ -94,7 +60,7 @@ def index():
         else:
             return "Action 'poweron' must have parameter 'mac'!"
 
-    def poweroff():
+    def poweroff(self):
         """
         Log on to remote node and shut it down.
 
@@ -121,7 +87,7 @@ def index():
         elif host is None:
             return "Action 'poweroff' must have parameter 'host'!"
 
-    def ping():
+    def ping(self):
         """
         Ping an IP address return the status.
 
@@ -163,29 +129,51 @@ def index():
         else:
             return "Action 'ping' must have parameter 'host'!"
 
-    action = request.args.get('action')
-    mac = request.args.get('mac')
-    user = request.args.get('user')
-    host = request.args.get('host')
-    serial = request.args.get('serial')
-    ep = request.args.get('ep')
-    apikey = request.args.get('apikey')
-    if LOGGING:
-        log_file = LogFile(LOG_FILE_NAME)
-    if action.lower() == 'poweron':
-        result = poweron()
-    elif action.lower() == 'poweroff':
-        result = poweroff()
-    elif action.lower() == 'ping':
-        result = ping()
-    else:
-        result = ("Unknown value '{}' for paramater 'action'. Choose from 'pow"
-                  "eron, poweroff, ping'!")
-        result = result.format(action)
-    if LOGGING:
-        log_file.close()
-    return result
+    def handle_request(self):
+        """Web server function."""
+        action = request.args.get('action')
+        mac = request.args.get('mac')
+        user = request.args.get('user')
+        host = request.args.get('host')
+        serial = request.args.get('serial')
+        ep = request.args.get('ep')
+        apikey = request.args.get('apikey')
+        if LOGGING:
+            log_file = LogFile(LOG_FILE_NAME)
+        if action.lower() == 'poweron':
+            result = poweron()
+        elif action.lower() == 'poweroff':
+            result = poweroff()
+        elif action.lower() == 'ping':
+            result = ping()
+        else:
+            result = ("Unknown value '{}' for paramater 'action'. Choose from 'pow"
+                      "eron, poweroff, ping'!")
+            result = result.format(action)
+        if LOGGING:
+            log_file.close()
+        return result
+
+
+    def run(self):
+        """Run the web server."""
+        zipatoserver.run(
+            debug=Settings.DEBUG,
+            host='0.0.0.0',
+            port=self.TCP_PORT,
+            processes=self.PROCESSES)
+
+zipatoserver = Flask(__name__,
+                     static_folder='html_static',
+                     template_folder='html_templates')
+@zipatoserver.route(HTTP_PATH)
+
+def index():
+    """Handle incomming HTTP requests."""
+    web_server = ZipatoServer()
+    return web_server.handle_request()
 
 
 if __name__ == '__main__':
-    zipatoserver.run(debug=debug, host='0.0.0.0', port=TCP_PORT, threaded=True)
+    web_server = ZipatoServer()
+    web_server.run()
