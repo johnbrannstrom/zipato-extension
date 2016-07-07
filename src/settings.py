@@ -15,20 +15,44 @@ import yaml
 class Settings:
     """Settings container."""
 
+    __CONFIG_FILE = 'zipatoserver.conf'
+    """(*str*) Config file name."""
+
+    __PATH_WITH_SLASH_PARAMETERS = [
+        'HTTP_PATH', 'WAKEONLAN_PATH', 'PING_PATH', 'SSH_PATH']
+    """(*list*) Parameters in this list with always end with a slash."""
+
+    __PATH_WITHOUT_SLASH_PARAMETERS = ['LOG_FILE_NAME', 'SSH_KEY_FILE']
+    """(*list*) Parameters in this list will never end with a slash."""
+
     def load_settings_from_yaml(self):
         """Set all system constants from YAML file."""
-        with open('zipatoserver.conf', 'r') as f:
+        with open(self.__CONFIG_FILE, 'r') as f:
             constants = yaml.load(f)
         for constant, value in constants:
-            if constant == 'HTTP_PATH':
-                Settings._HTTP_PATH = value
+            if constant in self.__PATH_WITH_SLASH_PARAMETERS:
+                Settings.__dict__[constant] = self._format_path(value, True)
+            elif constant in self.__PATH_WITHOUT_SLASH_PARAMETERS:
+                Settings.__dict__[constant] = self._format_path(value, False)
             else:
                 Settings.__dict__[constant] = value
 
-    _HTTP_PATH = None
-    @property
-    def HTTP_PATH(self):
-        if len(self._HTTP_PATH) == 0 or self._HTTP_PATH[-1] == '/':
-            return self._HTTP_PATH
+    @staticmethod
+    def _format_path(self, path, slash=True):
+        """
+        Format a path string.
+
+        :param str path: Path to format.
+        :param bool slash: If the path string should end with a slash
+        :rtype: str
+        :return: A formatted path string.
+
+        """
+        if len(path) == 0:
+            return path
+        elif slash and path[-1] != '/':
+            return path + '/'
+        elif not slash and path[-1] == '/':
+            return path[:-1]
         else:
-            return self._HTTP_PATH + '/'
+            return path
