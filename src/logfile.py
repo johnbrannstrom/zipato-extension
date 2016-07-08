@@ -19,16 +19,19 @@ class LogFile:
         """Initializes a LogFile instance."""
         self.file = open(name, 'a+')
 
-    def write(self, message):
+    def write(self, message, date_time=True):
         """
-        Write line to log file.
+        Write message to log file.
 
         :param str message: Log message.
+        :param bool date_time: If date and time should be added to message.
 
         """
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        line = now + ' ' + message + '\n'
-        self.file.write(line)
+        if date_time:
+            message = now + ' ' + message
+        message += '\n'
+        self.file.write(message)
 
     def close(self):
         """Close log file."""

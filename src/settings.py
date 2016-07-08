@@ -19,10 +19,12 @@ class Settings:
     """(*str*) Config file name."""
 
     __PATH_WITH_SLASH_PARAMETERS = [
-        'HTTP_PATH', 'WAKEONLAN_PATH', 'PING_PATH', 'SSH_PATH']
+        'WEB_API_PATH', 'WEB_GUI_PATH', 'WAKEONLAN_PATH', 'PING_PATH',
+        'SSH_PATH']
     """(*list*) Parameters in this list with always end with a slash."""
 
-    __PATH_WITHOUT_SLASH_PARAMETERS = ['LOG_FILE_NAME', 'SSH_KEY_FILE']
+    __PATH_WITHOUT_SLASH_PARAMETERS = [
+        'MESSAGE_LOG', 'ERROR_LOG', 'SSH_KEY_FILE']
     """(*list*) Parameters in this list will never end with a slash."""
 
     def load_settings_from_yaml(self):
@@ -38,7 +40,7 @@ class Settings:
                 Settings.__dict__[constant] = value
 
     @staticmethod
-    def _format_path(self, path, slash=True):
+    def _format_path(path, slash=True):
         """
         Format a path string.
 
