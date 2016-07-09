@@ -112,7 +112,7 @@ class ZipatoServer(Settings, Debug):
             else:
                 return '0'
 
-    def _handle_request(self):
+    def handle_request(self):
         """Web server function."""
         user = request.args.get('user')
         host = request.args.get('host')
@@ -140,20 +140,6 @@ class ZipatoServer(Settings, Debug):
             message_log.write(message)
             message_log.close()
         return result
-
-zipatoserver = Flask(__name__,
-                     static_folder='html_static',
-                     template_folder='html_templates')
-
-
-@zipatoserver.route(Settings.WEB_GUI_PATH)
-@zipatoserver.route(Settings.WEB_API_PATH + 'poweron')
-@zipatoserver.route(Settings.WEB_API_PATH + 'poweroff')
-@zipatoserver.route(Settings.WEB_API_PATH + 'ping')
-def index():
-    """Handle incomming HTTP requests."""
-    web_server = ZipatoServer()
-    return web_server._handle_request()
 
 
 class Main:
@@ -185,6 +171,20 @@ class Main:
             host='0.0.0.0',
             port=self.TCP_PORT,
             processes=self.PROCESSES)
+
+zipatoserver = Flask(__name__,
+                     static_folder='html_static',
+                     template_folder='html_templates')
+
+
+@zipatoserver.route(Settings.WEB_GUI_PATH)
+@zipatoserver.route(Settings.WEB_API_PATH + 'poweron')
+@zipatoserver.route(Settings.WEB_API_PATH + 'poweroff')
+@zipatoserver.route(Settings.WEB_API_PATH + 'ping')
+def index():
+    """Handle incomming HTTP requests."""
+    web_server = ZipatoServer()
+    return web_server.handle_request()
 
 if __name__ == '__main__':
     main = Main()
