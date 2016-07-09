@@ -27,15 +27,16 @@ class Settings:
         'MESSAGE_LOG', 'ERROR_LOG', 'SSH_KEY_FILE']
     """(*list*) Parameters in this list will never end with a slash."""
 
-    def load_settings_from_yaml(self):
+    @staticmethod
+    def load_settings_from_yaml():
         """Set all system constants from YAML file."""
-        with open(self.__CONFIG_FILE, 'r') as f:
+        with open(Settings.__CONFIG_FILE, 'r') as f:
             constants = yaml.load(f)
         for constant, value in constants:
-            if constant in self.__PATH_WITH_SLASH_PARAMETERS:
-                Settings.__dict__[constant] = self._format_path(value, True)
-            elif constant in self.__PATH_WITHOUT_SLASH_PARAMETERS:
-                Settings.__dict__[constant] = self._format_path(value, False)
+            if constant in Settings.__PATH_WITH_SLASH_PARAMETERS:
+                Settings.__dict__[constant] = Settings._format_path(value, True)
+            elif constant in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
+                Settings.__dict__[constant] = Settings._format_path(value, False)
             else:
                 Settings.__dict__[constant] = value
 
