@@ -143,7 +143,7 @@ class ZipatoServer(Settings, Debug):
         return result
 
 
-class Main:
+class Main(Settings):
     """Contains the script"""
 
     @staticmethod
@@ -165,7 +165,6 @@ class Main:
     def run(self):
         """Run the script"""
         args = self._parse_command_line_options()
-        Settings.load_settings_from_yaml()
         Settings.DEBUG = args.debug
         zipatoserver.run(
             debug=Settings.DEBUG,
@@ -173,16 +172,16 @@ class Main:
             port=self.TCP_PORT,
             processes=self.PROCESSES)
 
-# zipatoserver = Flask(__name__,
-#                      static_folder='html_static',
-#                      template_folder='html_templates')
-#
-#
-# @zipatoserver.route(Settings.WEB_GUI_PATH)
-# @zipatoserver.route(Settings.WEB_API_PATH + 'poweron')
-# @zipatoserver.route(Settings.WEB_API_PATH + 'poweroff')
-# @zipatoserver.route(Settings.WEB_API_PATH + 'ping')
 
+Settings.load_settings_from_yaml()
+zipatoserver = Flask(__name__,
+                     static_folder='html_static',
+                     template_folder='html_templates')
+
+@zipatoserver.route(Settings.WEB_GUI_PATH)
+@zipatoserver.route(Settings.WEB_API_PATH + 'poweron')
+@zipatoserver.route(Settings.WEB_API_PATH + 'poweroff')
+@zipatoserver.route(Settings.WEB_API_PATH + 'ping')
 
 def index():
     """Handle incomming HTTP requests."""

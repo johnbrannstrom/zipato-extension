@@ -10,6 +10,7 @@ This module contains settings.
 """
 
 import yaml
+import os
 
 
 class Settings:
@@ -27,18 +28,24 @@ class Settings:
         'MESSAGE_LOG', 'ERROR_LOG', 'SSH_KEY_FILE']
     """(*list*) Parameters in this list will never end with a slash."""
 
+    PROGRAM_PATH = None
+    """(*str*) Path of the program."""
+
     @staticmethod
     def load_settings_from_yaml():
         """Set all system constants from YAML file."""
-        with open(Settings.__CONFIG_FILE, 'r') as f:
+        Settings.PROGRAM_PATH = (
+            os.path.dirname(os.path.abspath(__file__)) + '/')
+        config_file = Settings.PROGRAM_PATH + Settings.__CONFIG_FILE
+        with open(config_file, 'r') as f:
             constants = yaml.load(f)
-        for constant, value in constants:
+        for constant, value in constants.items():
             if constant in Settings.__PATH_WITH_SLASH_PARAMETERS:
-                Settings.__dict__[constant] = Settings._format_path(value, True)
+                setattr(Settings, constant, Settings._format_path(value, True))
             elif constant in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
-                Settings.__dict__[constant] = Settings._format_path(value, False)
+                setattr(Settings, constant, Settings._format_path(value, False))
             else:
-                Settings.__dict__[constant] = value
+                setattr(Settings, constant, value)
 
     @staticmethod
     def _format_path(path, slash=True):
