@@ -29,7 +29,9 @@ class ZipatoServer(Settings, Debug):
         host = request.args.get('host')
         # Check input parameters
         if mac is None:
-            return "Error 'poweron' must have parameter 'mac'!"
+            message = "Error 'poweron' must have parameter 'mac'!"
+            json_message = {'error': message}
+            return json_message
         # Power on node
         if host is not None:
             command = "{}wakeonlan -i {} {}"
