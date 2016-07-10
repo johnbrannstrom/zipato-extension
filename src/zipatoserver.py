@@ -119,7 +119,10 @@ class ZipatoServer(Settings, Debug):
         host = request.args.get('host')
         mac = request.args.get('mac')
         try:
-            if request.path == self.WEB_API_PATH + 'poweron':
+            message = request.path
+            if request.path == self.WEB_GUI_PATH:
+                result = 'nisse'  # TODO more code here
+            elif request.path == self.WEB_API_PATH + 'poweron':
                 message = 'poweron?mac={}&host={}'
                 message = message.format(str(mac), str(host))
                 result = self._poweron()
@@ -136,10 +139,13 @@ class ZipatoServer(Settings, Debug):
             error_log.write(message)
             error_log.write(traceback.format_exc(), date_time=False)
             error_log.close()
-        else:
-            message_log = LogFile(self.MESSAGE_LOG)
-            message_log.write(message)
-            message_log.close()
+            if self.DEBUG > 0:
+                return traceback.format_exc()
+            return 'Internal system error!'
+        message_log = LogFile(self.MESSAGE_LOG)
+        print(self.MESSAGE_LOG) # TODO delete
+        message_log.write(message)
+        message_log.close()
         return result
 
 
@@ -154,10 +160,10 @@ class Main(Settings):
         :rtype: Namespace
 
         """
-        debug_help = 'Debugging on or off.'
+        debug_help = 'Debugging printout level.'
         description = 'Start Zipato extension web server.'
         parser = argparse.ArgumentParser(description=description)
-        parser.add_argument('--debug', type=int,
+        parser.add_argument('--debug', type=int, default=0,
                             help=debug_help, required=False)
         args = parser.parse_args()
         return args
@@ -166,23 +172,26 @@ class Main(Settings):
         """Run the script"""
         args = self._parse_command_line_options()
         Settings.DEBUG = args.debug
+        flask_debug = False
+        if args.debug > 0:
+            flask_debug = True
         zipatoserver.run(
-            debug=Settings.DEBUG,
+            debug=flask_debug,
             host='0.0.0.0',
             port=self.TCP_PORT,
             processes=self.PROCESSES)
 
 
-Settings.load_settings_from_yaml()
+Settings.load_settings_from_yaml(settings_path='/etc/')
 zipatoserver = Flask(__name__,
                      static_folder='html_static',
                      template_folder='html_templates')
+
 
 @zipatoserver.route(Settings.WEB_GUI_PATH)
 @zipatoserver.route(Settings.WEB_API_PATH + 'poweron')
 @zipatoserver.route(Settings.WEB_API_PATH + 'poweroff')
 @zipatoserver.route(Settings.WEB_API_PATH + 'ping')
-
 def index():
     """Handle incomming HTTP requests."""
     web_server = ZipatoServer()

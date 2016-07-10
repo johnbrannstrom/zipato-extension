@@ -1,8 +1,8 @@
 #!/bin/sh -e
 
-DAEMON="/home/john/html/httpaction.py"
-DAEMONUSER="john"
-DEAMON_NAME="zipatoserver.py"
+DAEMON="/usr/local/bin/httpaction.py"
+DAEMONUSER="root"
+DEAMON_NAME="zipatoserver"
 
 PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 

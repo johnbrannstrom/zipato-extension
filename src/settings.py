@@ -32,18 +32,30 @@ class Settings:
     """(*str*) Path of the program."""
 
     @staticmethod
-    def load_settings_from_yaml():
-        """Set all system constants from YAML file."""
+    def load_settings_from_yaml(settings_path=None):
+        """
+        Set system constants from YAML file.
+
+        :param str settings_path: If supplied this will determine the location
+                                  of the YAML file. If not YAML file will be
+                                  read from the current directory.
+
+        """
         Settings.PROGRAM_PATH = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
-        config_file = Settings.PROGRAM_PATH + Settings.__CONFIG_FILE
+        if settings_path is not None:
+            config_file = Settings._format_path(settings_path)
+            config_file += Settings.__CONFIG_FILE
+        else:
+            config_file = Settings.PROGRAM_PATH + Settings.__CONFIG_FILE
         with open(config_file, 'r') as f:
             constants = yaml.load(f)
         for constant, value in constants.items():
             if constant in Settings.__PATH_WITH_SLASH_PARAMETERS:
                 setattr(Settings, constant, Settings._format_path(value, True))
             elif constant in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
-                setattr(Settings, constant, Settings._format_path(value, False))
+                setattr(
+                    Settings, constant, Settings._format_path(value, False))
             else:
                 setattr(Settings, constant, value)
 
