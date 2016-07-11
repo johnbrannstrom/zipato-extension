@@ -9,6 +9,7 @@ import traceback
 from time import sleep
 from flask import Flask
 from flask import request
+from flask import render_template
 from settings import Settings
 from logfile import LogFile
 from debug import Debug
@@ -123,7 +124,7 @@ class ZipatoServer(Settings, Debug):
         try:
             message = request.path
             if request.path == self.WEB_GUI_PATH:
-                result = 'nisse'  # TODO more code here
+                result = render_template('index.html')
             elif request.path == self.WEB_API_PATH + 'poweron':
                 message = 'poweron?mac={}&host={}'
                 message = message.format(str(mac), str(host))
@@ -145,7 +146,6 @@ class ZipatoServer(Settings, Debug):
                 return traceback.format_exc()
             return 'Internal system error!'
         message_log = LogFile(self.MESSAGE_LOG)
-        print(self.MESSAGE_LOG) # TODO delete
         message_log.write(message)
         message_log.close()
         return result
