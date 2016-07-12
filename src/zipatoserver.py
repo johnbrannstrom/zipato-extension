@@ -118,7 +118,8 @@ class ZipatoServer(Settings, Debug):
             message = message.format(host)
             return self._json_response(message, 400)
         for i in range(self.PING_COUNT):
-            command = "{}ping -c {} {}".format(self.PING_PATH, str(self.PING_COUNT), host)
+            command = "{}ping -c {} {}"
+            command = command.format(self.PING_PATH, str(self.PING_COUNT), host)
             p = subprocess.Popen(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True)
@@ -131,11 +132,12 @@ class ZipatoServer(Settings, Debug):
         serial = self.ZIPATO_SERIAL
         # Set the status of a Zipato sensor to the ping status
         command = ("https://my.zipato.com/zipato-web/remoting/attribute/se"
-                   "t?serial={}&ep={}&apikey={}&state={}")
+                   "t?serial={}&ep={}&apiKey={}&state={}")
         if ping_ok:
             command = command.format(serial, ep, apikey, 'true')
         else:
             command = command.format(serial, ep, apikey, 'false')
+        self.debug_print(10, command, 'zipatoserver', 'ZipatoServer', '_ping')
         r = requests.get(command)
         status_code = r.status_code
         if status_code == 200:
@@ -154,15 +156,15 @@ class ZipatoServer(Settings, Debug):
             if request.path == self.WEB_GUI_PATH:
                 result = render_template('index.html')
             elif request.path == self.WEB_API_PATH + 'poweron':
-                message = 'poweron?mac={}&host={}'
-                message = message.format(str(mac), str(host))
+                message = 'poweron?mac={}'
+                message = message.format(str(mac))
                 result = self._poweron()
             elif request.path == self.WEB_API_PATH + 'poweroff':
                 message = 'poweroff?user={}&host={}'
                 message = message.format(str(user), str(host))
                 result = self._poweroff()
             elif request.path == self.WEB_API_PATH + 'ping':
-                message = 'poweroff?host={}'
+                message = 'ping?host={}'
                 message = message.format(str(host))
                 result = self._ping()
         except:

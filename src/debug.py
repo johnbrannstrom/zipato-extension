@@ -40,11 +40,11 @@ class Debug:
             end = "\033[0m"
             print()
             print("{}Debug level: {}{}".format(start, level, end))
-            if module is None:
+            if module is not None:
                 print("{}Module: {}{}".format(start, module, end))
-            if class_ is None:
+            if class_ is not None:
                 print("{}Class: {}{}".format(start, class_, end))
-            if function is None:
+            if function is not None:
                 print("{}Function: {}{}".format(start, function, end))
             print("{}{}{}".format(start, message, end))
             print()
