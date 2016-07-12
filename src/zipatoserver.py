@@ -6,10 +6,13 @@ import requests
 import re
 import argparse
 import traceback
+import json
+import codecs
 from time import sleep
 from flask import Flask
 from flask import request
 from flask import render_template
+from flask import Response
 from settings import Settings
 from logfile import LogFile
 from debug import Debug
@@ -17,6 +20,25 @@ from debug import Debug
 
 class ZipatoServer(Settings, Debug):
     """Zipato extension web server."""
+
+    @staticmethod
+    def _json_response(message, status_code=200):
+        """
+        Create a json HTTP response.
+
+        :param str message: Text message.
+        :param int status_code: HTTP status code
+        :rtype: Json
+        :return: Json HTTP response
+
+        """
+        data = {
+            'status': status_code,
+            'message': message
+        }
+        json_message = json.dumps(data)
+        return Response(
+            json_message, status=status_code, mimetype='application/json')
 
     def _poweron(self):
         """
@@ -31,8 +53,7 @@ class ZipatoServer(Settings, Debug):
         # Check input parameters
         if mac is None:
             message = "Error 'poweron' must have parameter 'mac'!"
-            json_message = {'error': message}
-            return json_message
+            return self._json_response(message, 400)
         # Power on node
         if host is not None:
             command = "{}wakeonlan -i {} {}"
@@ -45,34 +66,37 @@ class ZipatoServer(Settings, Debug):
                 shell=True)
             stdout, stderr = p.communicate()
             sleep(0.1)
-        return stdout + stderr
+        message = codecs.decode(stdout + stderr, 'utf-8')
+        return self._json_response(message, 200)
 
     def _poweroff(self):
         """
         Log on to remote node and shut it down.
 
-        .. note::
-
-            Password less login with SSH keys must be set up for this to work.
-
         :rtype: str
         :returns: Status message
 
         """
-        user = request.args.get('user')
         host = request.args.get('host')
-        if user is None:
-            return "Error 'poweroff' must have parameter 'user'!"
         if host is None:
-            return "Error 'poweroff' must have parameter 'host'!"
+            message = "Error 'poweroff' must have parameter 'host'!"
+            return self._json_response(message, 400)
+        if host in self.API_POWEROFF_HOSTS.keys():
+            user = self.API_POWEROFF_HOSTS[host]['user']
+        else:
+            message = "Error host '{}' has not been configured for 'poweroff'!"
+            message = message.format(host)
+            return self._json_response(message, 400)
         # Power off node
         command = "{}ssh -i {} -T {}@{} 'shutdown -h now'"
-        command = command.format(self.SSH_PATH, self.SSH_KEY_PATH, user, host)
+        ssh_key_file = self.API_POWEROFF_HOSTS[host]['ssh_key_file']
+        command = command.format(self.SSH_PATH, ssh_key_file, user, host)
         p = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             shell=True)
         stdout, stderr = p.communicate()
-        return stdout + stderr
+        message = codecs.decode(stdout + stderr, 'utf-8')
+        return self._json_response(message, 200)
 
     def _ping(self):
         """
@@ -84,7 +108,15 @@ class ZipatoServer(Settings, Debug):
         """
         host = request.args.get('host')
         if host is None:
-            return "Error 'ping' must have parameter 'host'!"
+            message = "Error 'ping' must have parameter 'host'!"
+            return self._json_response(message, 400)
+        if host in self.API_PING_HOSTS.keys():
+            ep = self.API_PING_HOSTS[host]['ep']
+            apikey = self.API_PING_HOSTS[host]['apikey']
+        else:
+            message = "Error host '{}' has not been configured for 'ping'!"
+            message = message.format(host)
+            return self._json_response(message, 400)
         for i in range(self.PING_COUNT):
             command = "{}ping -c {} {}".format(self.PING_PATH, str(self.PING_COUNT), host)
             p = subprocess.Popen(
@@ -97,24 +129,20 @@ class ZipatoServer(Settings, Debug):
                 break
             sleep(5)
         serial = self.ZIPATO_SERIAL
-        if host in self.API_PING_HOSTS.keys():
-            ep = self.API_PING_HOSTS[host]['ep']
-            apikey = self.API_PING_HOSTS[host]['apikey']
-            # Set the status of a Zipato sensor to the ping status
-            command = ("https://my.zipato.com/zipato-web/remoting/attribute/se"
-                       "t?serial={}&ep={}&apikey={}&state={}")
-            if ping_ok:
-                command = command.format(serial, ep, apikey, 'true')
-            else:
-                command = command.format(serial, ep, apikey, 'false')
-            r = requests.get(command)
-            return str(r.status_code)
+        # Set the status of a Zipato sensor to the ping status
+        command = ("https://my.zipato.com/zipato-web/remoting/attribute/se"
+                   "t?serial={}&ep={}&apikey={}&state={}")
+        if ping_ok:
+            command = command.format(serial, ep, apikey, 'true')
         else:
-            # Just return a the ping status
-            if ping_ok:
-                return '1'
-            else:
-                return '0'
+            command = command.format(serial, ep, apikey, 'false')
+        r = requests.get(command)
+        status_code = r.status_code
+        if status_code == 200:
+            message = 'Zipato ping status was updated'
+        else:
+            message = 'Zipato ping status could not be updated'
+        return self._json_response(message, status_code)
 
     def handle_request(self):
         """Web server function."""
@@ -143,8 +171,9 @@ class ZipatoServer(Settings, Debug):
             error_log.write(traceback.format_exc(), date_time=False)
             error_log.close()
             if self.DEBUG > 0:
-                return traceback.format_exc()
-            return 'Internal system error!'
+                return self._json_response(traceback.format_exc(), 500)
+            return self._json_response('Internal system error!', 500)
+
         message_log = LogFile(self.MESSAGE_LOG)
         message_log.write(message)
         message_log.close()
