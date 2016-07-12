@@ -7,22 +7,43 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head
      content must come *after* these tags -->
     <title>Zipato extension server</title>
-    <link href="stylesheet.css" rel="stylesheet">
-    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="html_static/stylesheet.css" rel="stylesheet">
+    <link href="html_static/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <script src="jquery.min.js"></script>
-    <script src="bootstrap.min.js"></script>
-    <h1>Zipato extension server</h1>
-    <p style="font-style:bold;">Disclaimer</p> This is NOT an official Zipato
-    product. This solution has been developed for my own personal use and
-    shared via GitHub for your enjoyment.
-    <br>
-    <h1>API commands</h1>
-    <ul>
-      <li><a href="/api/ping">ping</a>
-      <li><a href="/api/poweron">power on</a>
-      <li><a href="/api/poweroff">power off</a>
-    </ul>
+    <script src="html_static/jquery-1.9.1.min.js"></script>
+    <script src="html_static/bootstrap.min.js"></script>
+    <div class="jumbotron text-center">
+        <h1>Zipato extension server</h1>
+        <p class="text-danger">
+
+        </p>
+    </div>
+    <!-- Menu -->
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
+            <br>
+            <ul class="nav nav-pills">
+                <li class="active"><a data-toggle="tab" href="#about">About</a></li>
+                <li><a data-toggle="tab" href="#settings">Settings</a></li>
+                <li><a data-toggle="tab" href="#api">API</a></li>
+            </ul>
+            <br>
+        </div>
+        <div class="col-sm-2"></div>
+    </div>
+    <!-- Pages -->
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
+            <div class="tab-content">
+                {% include 'about.html' %}
+                {% include 'settings.html' %}
+                {% include 'api.html' %}
+            </div>
+        </div>
+        <div class="col-sm-2"></div>
+    </div>
 </body>
 </html>
