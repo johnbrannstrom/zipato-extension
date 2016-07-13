@@ -11,6 +11,7 @@ This module contains settings.
 
 import yaml
 import os
+from flask import render_template
 
 
 class Settings:
@@ -37,7 +38,7 @@ class Settings:
         Set system constants from YAML file.
 
         :param str settings_path: If supplied this will determine the location
-                                  of the YAML file. If not YAML file will be
+                                  of the YAML file. If not, YAML file will be
                                   read from the current directory.
 
         """
@@ -78,3 +79,29 @@ class Settings:
             return path[:-1]
         else:
             return path
+
+    @staticmethod
+    def render_settings_html(settings_path=None):
+        """
+        Render web GUI for handling settings.
+
+        :param str settings_path: If supplied this will determine the location
+                                  of the YAML file. If not, YAML file will be
+                                  read from the current directory.
+
+        """
+        program_path = (
+            os.path.dirname(os.path.abspath(__file__)) + '/')
+        if settings_path is not None:
+            config_file = Settings._format_path(settings_path)
+            config_file += Settings.__CONFIG_FILE
+        else:
+            config_file = program_path + Settings.__CONFIG_FILE
+        with open(config_file, 'r') as f:
+            constants = yaml.load(f)
+        for constant, value in constants.items():
+            if constant in Settings.__PATH_WITH_SLASH_PARAMETERS:
+                constants[constant] = Settings._format_path(value, True)
+            elif constant in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
+                constants[constant] = Settings._format_path(value, False)
+        return render_template('settings.html', constants=constants)

@@ -15,9 +15,6 @@
     <script src="html_static/bootstrap.min.js"></script>
     <div class="jumbotron text-center">
         <h1>Zipato extension server</h1>
-        <p class="text-danger">
-
-        </p>
     </div>
     <!-- Menu -->
     <div class="row">
@@ -41,7 +38,7 @@
         <div class="col-sm-8">
             <div class="tab-content">
                 {% include 'about.html' %}
-                {% include 'settings.html' %}
+                {{ settings | safe }}
                 {% include 'api.html' %}
             </div>
         </div>

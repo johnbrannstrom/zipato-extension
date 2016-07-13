@@ -154,7 +154,9 @@ class ZipatoServer(Settings, Debug):
         try:
             message = request.path
             if request.path == self.WEB_GUI_PATH:
-                result = render_template('index.html')
+                settings = self.render_settings_html(settings_path='/etc/')
+                result = render_template(
+                    'index.html', settings=settings)
             elif request.path == self.WEB_API_PATH + 'poweron':
                 message = 'poweron?mac={}'
                 message = message.format(str(mac))
