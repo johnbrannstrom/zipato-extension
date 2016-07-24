@@ -1,15 +1,43 @@
 <div id="settings" class="tab-pane fade">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for constant, value in constants.items() %}
-            <tr><td>{{ constant }}</td><td>{{ value }}</td></tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <form>
+        <button type="submit" class="btn btn-success pull-right">
+            Save settings
+        </button>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th colspan="4">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for constant, value in constants.items() %}
+                {% if value is mapping %}
+                <tr><td colspan="4">{{ constant }}</td></tr>
+                {% for sub_header, sub_constants in value.items() %}
+                <tr>
+                    {% for sub_constant, sub_value in sub_constants.items() %}
+                    <td></td>
+                    <td>{{ sub_header }}</td>
+                    <td>{{ sub_constant }}</td>
+                    <td>{{ sub_value }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td>{{ constant }}</td>
+                    <td colspan="3">
+                        <input type="text" value="{{ value }}">
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-success pull-right">
+            Save settings
+        </button>
+    </form>
+    <br>
 </div>
