@@ -11,6 +11,7 @@ This module contains settings.
 
 import yaml
 import os
+import re
 from flask import render_template
 
 
@@ -109,8 +110,18 @@ class Settings:
         comments = {}
         file = open(config_file, encoding='utf-8')
         lines = file.readlines()
-        for line in lines:
-            if
+        for i in range(len(lines)-1, -1, -1):
+            # Test/set more comments
+            if re.match('\A#.*', lines[i]):
+                comments[constant] = (
+                    lines[i][1:].strip() + ' ' + comments[constant])
+            for key in constants.keys():
+                # Test/set new constant
+                regex = "\A{}:.*".format(key)
+                if re.match(regex, lines[i]):
+                    constant = key
+                    comments[constant] = ''
+
         return render_template('settings.html',
                                constants=constants,
                                comments=comments)

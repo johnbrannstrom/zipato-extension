@@ -13,6 +13,9 @@
             </thead>
             <tbody>
                 {% for constant, value in constants.items() %}
+                <tr>
+                    <th colspan="4">{{ comments[constant] }}</th>
+                </tr>
                 {% if value is mapping %}
                 <tr><td colspan="4">{{ constant }}</td></tr>
                 {% for sub_header, sub_constants in value.items() %}
