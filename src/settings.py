@@ -97,6 +97,7 @@ class Settings:
             config_file += Settings.__CONFIG_FILE
         else:
             config_file = program_path + Settings.__CONFIG_FILE
+        # Load constants from disk
         with open(config_file, 'r') as f:
             constants = yaml.load(f)
         for constant, value in constants.items():
@@ -104,4 +105,12 @@ class Settings:
                 constants[constant] = Settings._format_path(value, True)
             elif constant in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
                 constants[constant] = Settings._format_path(value, False)
-        return render_template('settings.html', constants=constants)
+        # Load comments from disk
+        comments = {}
+        file = open(config_file, encoding='utf-8')
+        lines = file.readlines()
+        for line in lines:
+            if
+        return render_template('settings.html',
+                               constants=constants,
+                               comments=comments)
