@@ -1,8 +1,31 @@
 <div id="settings" class="tab-pane fade">
-    <form>
-        <button type="submit" class="btn btn-success pull-right">
-            Save settings
-        </button>
+    <script type="text/javascript">
+    $(document).ready(function() {
+       $("#save_settings2").click(function() {
+           $('#div1').text('Hi I am replace');
+       });
+    });
+    </script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+       $("#save_settings1").click(function() {
+           var form_data = JSON.stringify($("#settings_form").serializeArray());
+           $.ajax({
+              type: "POST",
+              url: "{{ web_path }}",
+              data: form_data,
+              success: function(){},
+              dataType: "json",
+              contentType : "application/json"
+            });
+        });
+    });
+    </script>
+    <div id="div1">kalle</div>
+    <button id='save_settings1' class="btn btn-success pull-right">
+        Save settings
+    </button>
+    <form id="settings_form">
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -49,9 +72,9 @@
                 {% endfor %}
             </tbody>
         </table>
-        <button type="submit" class="btn btn-success pull-right">
-            Save settings
-        </button>
     </form>
+    <button id='save_settings2' class="btn btn-success pull-right">
+        Save settings
+    </button>
     <br>
 </div>

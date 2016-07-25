@@ -169,6 +169,9 @@ class ZipatoServer(Settings, Debug):
                 message = 'ping?host={}'
                 message = message.format(str(host))
                 result = self._ping()
+            elif request.path == self.WEB_API_PATH + 'save_settings':
+                message = 'save_settings'
+                result = 'nisse'  # TODO change this
         except:
             error_log = LogFile(self.ERROR_LOG)
             error_log.write(message)
@@ -227,6 +230,7 @@ zipatoserver = Flask(__name__,
 @zipatoserver.route(Settings.WEB_API_PATH + 'poweron')
 @zipatoserver.route(Settings.WEB_API_PATH + 'poweroff')
 @zipatoserver.route(Settings.WEB_API_PATH + 'ping')
+@zipatoserver.route(Settings.WEB_API_PATH + 'save_settings', methods=['POST'])
 def index():
     """Handle incomming HTTP requests."""
     web_server = ZipatoServer()

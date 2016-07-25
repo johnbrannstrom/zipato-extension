@@ -124,4 +124,5 @@ class Settings:
 
         return render_template('settings.html',
                                constants=constants,
-                               comments=comments)
+                               comments=comments,
+                               web_path=Settings.WEB_API_PATH + 'save_settings')
