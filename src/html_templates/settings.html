@@ -7,13 +7,44 @@
     });
     </script>
     <script type="text/javascript">
+    // This was written by  JanPaulEttles
+    $.fn.formToJSON = function() {
+        var objectGraph = {};
+        function add(objectGraph, name, value) {
+            if(name.length == 1) {
+                //if the array is now one element long, we're done
+                objectGraph[name[0]] = value;
+            }
+            else {
+                //else we've still got more than a single element of depth
+                if(objectGraph[name[0]] == null) {
+                    //create the node if it doesn't yet exist
+                    objectGraph[name[0]] = {};
+                }
+            //recurse, chopping off the first array element
+                add(objectGraph[name[0]], name.slice(1), value);
+            }
+        };
+        //loop through all of the input/textarea elements of the form
+        //this.find('input, textarea').each(function() {
+        $(this).find('input').each(function() {
+            //ignore the submit button
+            if($(this).attr('name') != 'submit') {
+                //split the dot notated names into arrays and pass along with the value
+                add(objectGraph, $(this).attr('name').split('_-'), $(this).val());
+            }
+        });
+        return JSON.stringify(objectGraph);
+    };
+    </script>
+    <script type="text/javascript">
     $(document).ready(function() {
        $("#save_settings1").click(function() {
-           var form_data = JSON.stringify($("#settings_form").serializeArray());
+           var formData = $("#settings_form").formToJSON();
            $.ajax({
               type: "POST",
               url: "{{ web_path }}",
-              data: form_data,
+              data: formData,
               success: function(){},
               dataType: "json",
               contentType : "application/json"
@@ -56,7 +87,10 @@
                         <td colspan="2">
                         <td>{{ sub_constant }}</td>
                         <td>
-                            <input size="35" type="text" value="{{ sub_value }}">
+                            <input size="35"
+                                   type="text"
+                                   value="{{ sub_value }}"
+                                   name="{{ constant }}_-{{ sub_header }}_-{{ sub_constant }}"/>
                         </td>
                     </tr>
                     {% endfor %}
@@ -65,7 +99,10 @@
                 <tr>
                     <td colspan="3">{{ constant }}</td>
                     <td>
-                        <input size="35" type="text" value="{{ value }}">
+                        <input size="35"
+                               type="text"
+                               value="{{ value }}"
+                               name="{{ constant }}"/>
                     </td>
                 </tr>
                 {% endif %}

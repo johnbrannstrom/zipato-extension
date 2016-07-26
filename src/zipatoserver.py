@@ -171,6 +171,7 @@ class ZipatoServer(Settings, Debug):
                 result = self._ping()
             elif request.path == self.WEB_API_PATH + 'save_settings':
                 message = 'save_settings'
+                print(str(request.get_json()))  # TODO
                 result = 'nisse'  # TODO change this
         except:
             error_log = LogFile(self.ERROR_LOG)
