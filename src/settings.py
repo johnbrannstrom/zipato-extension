@@ -45,11 +45,7 @@ class Settings:
         """
         Settings.PROGRAM_PATH = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
-        if settings_path is not None:
-            config_file = Settings._format_path(settings_path)
-            config_file += Settings.__CONFIG_FILE
-        else:
-            config_file = Settings.PROGRAM_PATH + Settings.__CONFIG_FILE
+        config_file = _get_config_file(settings_path, program_path)
         with open(config_file, 'r') as f:
             constants = yaml.load(f)
         for constant, value in constants.items():
@@ -81,6 +77,24 @@ class Settings:
         else:
             return path
 
+ @staticmethod
+    def _get_config_file(settings_path, program_path):
+        """
+        Get full path and name of the YAML config file.
+        
+        :param str settings_path: Path to the YAML config file.
+        :param str program_path: Path to the program.
+        :rtype: str
+        :returns: Full path and name of the config file.
+        
+        """
+        if settings_path is not None:
+            config_file = Settings._format_path(settings_path)
+            config_file += Settings.__CONFIG_FILE
+        else:
+            config_file = program_path + Settings.__CONFIG_FILE
+        return config_file
+
     @staticmethod
     def render_settings_html(settings_path=None):
         """
@@ -93,11 +107,7 @@ class Settings:
         """
         program_path = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
-        if settings_path is not None:
-            config_file = Settings._format_path(settings_path)
-            config_file += Settings.__CONFIG_FILE
-        else:
-            config_file = program_path + Settings.__CONFIG_FILE
+        config_file = _get_config_file(settings_path, program_path)
         # Load constants from disk
         with open(config_file, 'r') as f:
             constants = yaml.load(f)
@@ -126,3 +136,18 @@ class Settings:
                                constants=constants,
                                comments=comments,
                                web_path=Settings.WEB_API_PATH + 'save_settings')
+
+    @staticmethod
+    def write_settings_to_file(settings_path=None, settings_json):
+        """
+        Write settings to file.
+
+        :param str settings_path: If supplied this will determine the location
+                                  of the YAML file. If not, YAML file will be
+                                  read from the current directory.
+        :param str settings_json: Settings that should be written to file.
+
+        """
+        program_path = (
+            os.path.dirname(os.path.abspath(__file__)) + '/')
+        config_file = _get_config_file(settings_path, program_path)# TODO enter more code here.
