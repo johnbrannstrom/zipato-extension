@@ -34,6 +34,24 @@ class Settings:
     """(*str*) Path of the program."""
 
     @staticmethod
+    def _get_config_file(settings_path, program_path):
+        """
+        Get full path and name of the YAML config file.
+        
+        :param str settings_path: Path to the YAML config file.
+        :param str program_path: Path to the program.
+        :rtype: str
+        :returns: Full path and name of the config file.
+        
+        """
+        if settings_path is not None:
+            config_file = Settings._format_path(settings_path)
+            config_file += Settings.__CONFIG_FILE
+        else:
+            config_file = program_path + Settings.__CONFIG_FILE
+        return config_file
+
+    @staticmethod
     def load_settings_from_yaml(settings_path=None):
         """
         Set system constants from YAML file.
@@ -45,7 +63,7 @@ class Settings:
         """
         Settings.PROGRAM_PATH = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
-        config_file = _get_config_file(settings_path, program_path)
+        config_file = Settings._get_config_file(settings_path, program_path)
         with open(config_file, 'r') as f:
             constants = yaml.load(f)
         for constant, value in constants.items():
@@ -77,24 +95,6 @@ class Settings:
         else:
             return path
 
- @staticmethod
-    def _get_config_file(settings_path, program_path):
-        """
-        Get full path and name of the YAML config file.
-        
-        :param str settings_path: Path to the YAML config file.
-        :param str program_path: Path to the program.
-        :rtype: str
-        :returns: Full path and name of the config file.
-        
-        """
-        if settings_path is not None:
-            config_file = Settings._format_path(settings_path)
-            config_file += Settings.__CONFIG_FILE
-        else:
-            config_file = program_path + Settings.__CONFIG_FILE
-        return config_file
-
     @staticmethod
     def render_settings_html(settings_path=None):
         """
@@ -107,7 +107,7 @@ class Settings:
         """
         program_path = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
-        config_file = _get_config_file(settings_path, program_path)
+        config_file = Settings._get_config_file(settings_path, program_path)
         # Load constants from disk
         with open(config_file, 'r') as f:
             constants = yaml.load(f)
@@ -150,4 +150,9 @@ class Settings:
         """
         program_path = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
-        config_file = _get_config_file(settings_path, program_path)# TODO enter more code here.
+        config_file = Settings._get_config_file(settings_path, program_path)
+        
+        
+        
+        
+        # TODO enter more code here.
