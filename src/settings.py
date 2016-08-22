@@ -151,8 +151,11 @@ class Settings:
         program_path = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
         config_file = Settings._get_config_file(settings_path, program_path)
-        
-        
-        
+        file_obj = config_file(fname, ,'r', encoding="utf-8")
+        # Read YAML file comments from disk.
+        lines = file_obj.readlines()
+        file_obj.close()
+        for line in lines:
+            if
         
         # TODO enter more code here.
