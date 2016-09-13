@@ -157,10 +157,13 @@ class Settings:
         file_obj.close()
         # Get all comments
         comment = ''
+        param_comments = {}
         for i in range(len(lines)):
-            line = line[i].strip()
-            if line == '':
-                pass
-            elif line[0] == '#':
-                comment += line[1:].strip() + '\n'
-                
+            current_line = line[i].strip()
+            if len(current_line) > 0 and current_line[0] == '#':
+                comment += current_line[1:].strip() + '\n'
+                next_line = lines[i+1].strip()
+                if next_line[0] != '#':
+                    param = re.match('\s*(.+?):.*', next_line).group(1)
+                    param_comments[param] = comment[:-1]
+                    comment = ''
