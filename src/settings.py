@@ -155,7 +155,12 @@ class Settings:
         # Read YAML file comments from disk.
         lines = file_obj.readlines()
         file_obj.close()
-        for line in lines:
-            if
-        
-        # TODO enter more code here.
+        # Get all comments
+        comment = ''
+        for i in range(len(lines)):
+            line = line[i].strip()
+            if line == '':
+                pass
+            elif line[0] == '#':
+                comment += line[1:].strip() + '\n'
+                
