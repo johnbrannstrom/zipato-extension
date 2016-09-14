@@ -159,9 +159,12 @@ class Settings:
         comment = ''
         param_comments = {}
         for i in range(len(lines)):
-            if len(lines[i].strip()) > 0 and lines.strip()[0] == '#':
+            if lines[i].strip() == '':
+                # Skip blank lines
+                pass
+            elif len(lines[i].strip()) > 0 and lines[i].strip()[0] == '#':
                 comment += lines[i].strip()[1:] + '\n'
-            if lines[i+1].strip()[0] != '#':
+            elif lines[i+1].strip()[0] != '#':
                 result = re.match('( *)(.+?):.*', lines[i+1]).group(2)
                 next_depth = result.group(1)
                 param = result.group(2)
