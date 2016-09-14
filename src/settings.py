@@ -159,11 +159,12 @@ class Settings:
         comment = ''
         param_comments = {}
         for i in range(len(lines)):
-            current_line = line[i].strip()
-            if len(current_line) > 0 and current_line[0] == '#':
-                comment += current_line[1:].strip() + '\n'
-                next_line = lines[i+1].strip()
-                if next_line[0] != '#':
-                    param = re.match('\s*(.+?):.*', next_line).group(1)
-                    param_comments[param] = comment[:-1]
-                    comment = ''
+            if len(lines[i].strip()) > 0 and lines.strip()[0] == '#':
+                comment += lines[i].strip()[1:] + '\n'
+            if lines[i+1].strip()[0] != '#':
+                result = re.match('( *)(.+?):.*', lines[i+1]).group(2)
+                next_depth = result.group(1)
+                param = result.group(2)
+                param_comments[param] = comment[:-1]
+                comment = ''
+            previous_depth = current_depth
