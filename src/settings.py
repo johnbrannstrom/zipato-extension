@@ -61,7 +61,7 @@ class Settings:
                                   read from the current directory.
 
         """
-        Settings.PROGRAM_PATH = (
+        Settings.PROGRAM_PATH = program_path = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
         config_file = Settings._get_config_file(settings_path, program_path)
         with open(config_file, 'r') as f:
@@ -144,30 +144,45 @@ class Settings:
 
         :param str settings_path: If supplied this will determine the location
                                   of the YAML file. If not, YAML file will be
-                                  read from the current directory.
-        :param str settings_json: Settings that should be written to file.
+                                  written/read to/from the current directory.
+        :param dict settings_json: Settings that should be written to file.
+
+        ..note:
+
+            Comments are only supported on top level parameters.
 
         """
         program_path = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
         config_file = Settings._get_config_file(settings_path, program_path)
-        file_obj = config_file(fname, ,'r', encoding="utf-8")
+        file_obj = open(config_file, 'r', encoding="utf-8")
         # Read YAML file comments from disk.
         lines = file_obj.readlines()
         file_obj.close()
         # Get all comments
-        comment = ''
+        comment = []
         param_comments = {}
         for i in range(len(lines)):
-            if lines[i].strip() == '':
-                # Skip blank lines
-                pass
-            elif len(lines[i].strip()) > 0 and lines[i].strip()[0] == '#':
-                comment += lines[i].strip()[1:] + '\n'
-            elif lines[i+1].strip()[0] != '#':
-                result = re.match('( *)(.+?):.*', lines[i+1]).group(2)
-                next_depth = result.group(1)
-                param = result.group(2)
-                param_comments[param] = comment[:-1]
-                comment = ''
-            previous_depth = current_depth
+            if len(lines[i]) > 0 and lines[i][0] == '#':
+                comment.append(lines[i].strip())
+                if lines[i+1][0] != '#':
+                    param = re.match('(.+?):.*', lines[i]).group(1)
+                    param_comments[param] = comment
+                    comment = []
+        # Create YAML with comments
+        settings_yaml = yaml.dump(settings_json, default_flow_style=False)
+        settings_list = settings_yaml.split('\n')
+        for i in range(len(settings_list)):
+            top_level_param = re.match('\A(\S+):.*\Z', settings_list[i])
+            if top_level_param is not None:
+                # Top level paramater found
+                param = top_level_param.group(1)
+                for test_param, comments in param_comments.items():
+                    if param == test_param:
+                        # Insert parameter comment
+                        for comment in comments:
+                            settings_list.insert(i+1, comment)
+        #  Write YAML to file
+        with open(config_file+'~', 'w') as file_obj:
+            file_obj.writelines(settings_yaml)
+        os.rename(config_file+'~', config_file)
