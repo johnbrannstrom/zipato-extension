@@ -146,6 +146,20 @@ class ZipatoServer(Settings, Debug):
             message = 'Zipato ping status could not be updated'
         return self._json_response(message, status_code)
 
+    def _save_settings(self):
+        """
+        Save settings to disk.
+
+        :rtype: str
+        :returns: Status message
+
+        """
+        # TODO enter more code here
+        settings_json = request.get_json()
+        self.write_settings_to_file(settings_json, settings_path='/etc/')
+        message = 'Settings written to file'
+        return self._json_response(message, 200)
+
     def handle_request(self):
         """Web server function."""
         user = request.args.get('user')
@@ -171,8 +185,7 @@ class ZipatoServer(Settings, Debug):
                 result = self._ping()
             elif request.path == self.WEB_API_PATH + 'save_settings':
                 message = 'save_settings'
-                print(str(request.get_json()))  # TODO
-                result = 'nisse'  # TODO change this
+                result = self._save_settings()
         except:
             error_log = LogFile(self.ERROR_LOG)
             error_log.write(message)
@@ -181,7 +194,6 @@ class ZipatoServer(Settings, Debug):
             if self.DEBUG > 0:
                 return self._json_response(traceback.format_exc(), 500)
             return self._json_response('Internal system error!', 500)
-
         message_log = LogFile(self.MESSAGE_LOG)
         message_log.write(message)
         message_log.close()

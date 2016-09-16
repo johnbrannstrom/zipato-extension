@@ -138,14 +138,14 @@ class Settings:
                                web_path=Settings.WEB_API_PATH + 'save_settings')
 
     @staticmethod
-    def write_settings_to_file(settings_path=None, settings_json):
+    def write_settings_to_file(settings_json, settings_path=None):
         """
         Write settings to file.
 
+        :param dict settings_json: Settings that should be written to file.
         :param str settings_path: If supplied this will determine the location
                                   of the YAML file. If not, YAML file will be
                                   written/read to/from the current directory.
-        :param dict settings_json: Settings that should be written to file.
 
         ..note:
 
