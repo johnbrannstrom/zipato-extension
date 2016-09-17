@@ -30,6 +30,14 @@ class Settings:
         'MESSAGE_LOG', 'ERROR_LOG', 'SSH_KEY_FILE']
     """(*list*) Parameters in this list will never end with a slash."""
 
+    __INTEGER_PARAMETERS = [
+        'PING_COUNT', 'PROCESSES', 'TCP_PORT']
+    """(*list*) Parameters in this list will be treated as integers."""
+
+    __BOOLEAN_PARAMETERS = [
+        'DEBUG']
+    """(*list*) Parameters in this list will be treated as boolean."""
+
     PROGRAM_PATH = None
     """(*str*) Path of the program."""
 
@@ -72,6 +80,10 @@ class Settings:
             elif constant in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
                 setattr(
                     Settings, constant, Settings._format_path(value, False))
+            elif constant in Settings.__INTEGER_PARAMETERS:
+                setattr(Settings, constant, int(value))
+            elif constant in Settings.__BOOLEAN_PARAMETERS:
+                setattr(Settings, constant, bool(value))
             else:
                 setattr(Settings, constant, value)
 
@@ -166,11 +178,14 @@ class Settings:
             if len(lines[i]) > 0 and lines[i][0] == '#':
                 comment.append(lines[i].strip())
                 if lines[i+1][0] != '#':
-                    param = re.match('(.+?):.*', lines[i]).group(1)
+                    param = re.match('(.+?):.*', lines[i+1]).group(1)
                     param_comments[param] = comment
                     comment = []
+#        print(param_comments)  # TODO delete
         # Create YAML with comments
-        settings_yaml = yaml.dump(settings_json, default_flow_style=False)
+        settings_yaml = yaml.dump(settings_json,
+                                  default_flow_style=False,
+                                  indent=4)
         settings_list = settings_yaml.split('\n')
         for i in range(len(settings_list)):
             top_level_param = re.match('\A(\S+):.*\Z', settings_list[i])
@@ -182,6 +197,8 @@ class Settings:
                         # Insert parameter comment
                         for comment in comments:
                             settings_list.insert(i+1, comment)
+
+        settings_yaml = '\n'.join(settings_list)
         #  Write YAML to file
         with open(config_file+'~', 'w') as file_obj:
             file_obj.writelines(settings_yaml)

@@ -189,10 +189,11 @@ class ZipatoServer(Settings, Debug):
         except:
             error_log = LogFile(self.ERROR_LOG)
             error_log.write(message)
-            error_log.write(traceback.format_exc(), date_time=False)
+            traceback_message = traceback.format_exc()
+            error_log.write(traceback_message, date_time=False)
             error_log.close()
             if self.DEBUG > 0:
-                return self._json_response(traceback.format_exc(), 500)
+                return self._json_response(traceback_message, 500)
             return self._json_response('Internal system error!', 500)
         message_log = LogFile(self.MESSAGE_LOG)
         message_log.write(message)
