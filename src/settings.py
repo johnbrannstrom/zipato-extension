@@ -181,24 +181,29 @@ class Settings:
                     param = re.match('(.+?):.*', lines[i+1]).group(1)
                     param_comments[param] = comment
                     comment = []
-#        print(param_comments)  # TODO delete
         # Create YAML with comments
         settings_yaml = yaml.dump(settings_json,
                                   default_flow_style=False,
                                   indent=4)
         settings_list = settings_yaml.split('\n')
-        for i in range(len(settings_list)):
+        i = 0
+        while i < len(settings_list):
             top_level_param = re.match('\A(\S+):.*\Z', settings_list[i])
+            # Top level parameter found
             if top_level_param is not None:
-                # Top level paramater found
                 param = top_level_param.group(1)
+                settings_list.insert(i, '')  # Add newline
+                i += 1
                 for test_param, comments in param_comments.items():
                     if param == test_param:
                         # Insert parameter comment
                         for comment in comments:
-                            settings_list.insert(i+1, comment)
-
-        settings_yaml = '\n'.join(settings_list)
+                            settings_list.insert(i, comment)
+                            i += 1
+                        break
+                        del comments[param]
+            i += 1
+        settings_yaml = '\n'.join(settings_list)[1:]
         #  Write YAML to file
         with open(config_file+'~', 'w') as file_obj:
             file_obj.writelines(settings_yaml)
