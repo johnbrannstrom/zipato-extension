@@ -181,6 +181,16 @@ class Settings:
                     param = re.match('(.+?):.*', lines[i+1]).group(1)
                     param_comments[param] = comment
                     comment = []
+        # Set correct type of parameters
+        for param, value in settings_json.items():
+            if param in Settings.__PATH_WITH_SLASH_PARAMETERS:
+                settings_json[param] = Settings._format_path(value, True)
+            elif param in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
+                settings_json[param] = Settings._format_path(value, False)
+            elif param in Settings.__INTEGER_PARAMETERS:
+                settings_json[param] = int(value)
+            elif param in Settings.__BOOLEAN_PARAMETERS:
+                settings_json[param] = bool(value)
         # Create YAML with comments
         settings_yaml = yaml.dump(settings_json,
                                   default_flow_style=False,
