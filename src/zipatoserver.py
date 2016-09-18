@@ -251,7 +251,7 @@ zipatoserver = Flask(__name__,
 @zipatoserver.route(Settings.WEB_API_PATH + 'poweroff')
 @zipatoserver.route(Settings.WEB_API_PATH + 'ping')
 @zipatoserver.route(Settings.WEB_API_PATH + 'save_settings', methods=['POST'])
-@zipatoserver.route(Settings.WEB_API_PATH + 'delete_param', methods=['DELETE'])
+@zipatoserver.route(Settings.WEB_API_PATH + 'remove_param', methods=['DELETE'])
 @zipatoserver.route(Settings.WEB_API_PATH + 'add_param', methods=['PUT'])
 def index():
     """Handle incomming HTTP requests."""

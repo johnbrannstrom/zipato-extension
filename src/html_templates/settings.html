@@ -62,9 +62,10 @@
             });
         </script>
         {% for sub_header, sub_constants in value.items() %}
-        <script type="text/javascript">
+
+    <script type="text/javascript">
             $(document).ready(function() {
-               $("#{{ constant }}_{{ sub_header }}_remove").click(function() {
+               $("#{{ constant }}_{{ sub_header|replace('.', '_') }}_remove").click(function() {
                    $.ajax({
                       type: "DELETE",
                       url: "{{ remove_param_path }}",
@@ -113,7 +114,7 @@
                     {% if header_line %}
                     <tr>
                         <td>
-                            <span id="{{ constant }}_{{ sub_header }}_remove"
+                            <span id="{{ constant }}_{{ sub_header|replace('.', '_') }}_remove"
                                   role="button"
                                   class="glyphicon glyphicon-remove-sign text-danger remove-param">
                             </span>
