@@ -153,11 +153,10 @@ class Settings:
                 if re.match(regex, lines[i]):
                     constant = key
                     comments[constant] = ''
-
         return render_template('settings.html',
                                constants=constants,
                                comments=comments,
-                               web_path=Settings.WEB_API_PATH + 'save_settings')
+                               save_path=Settings.WEB_API_PATH + 'save_settings')
 
     @staticmethod
     def write_settings_to_file(settings_json, settings_path=None):

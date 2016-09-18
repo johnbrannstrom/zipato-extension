@@ -48,6 +48,7 @@ class ZipatoServer(Settings, Debug):
         :returns: Status message
 
         """
+        global stdout
         mac = request.args.get('mac')
         host = request.args.get('host')
         # Check input parameters
@@ -157,6 +158,7 @@ class ZipatoServer(Settings, Debug):
         # TODO enter more code here
         settings_json = request.get_json()
         self.write_settings_to_file(settings_json, settings_path='/etc/')
+        Settings.load_settings_from_yaml(settings_path='/etc/')
         message = 'Settings written to file'
         return self._json_response(message, 200)
 
@@ -170,7 +172,10 @@ class ZipatoServer(Settings, Debug):
             if request.path == self.WEB_GUI_PATH:
                 settings = self.render_settings_html(settings_path='/etc/')
                 result = render_template(
-                    'index.html', settings=settings)
+                    'index.html', settings=settings,
+                    ping_path=Settings.WEB_API_PATH + 'ping',
+                    poweron_path=Settings.WEB_API_PATH + 'poweron',
+                    poweroff_path=Settings.WEB_API_PATH + 'poweroff')
             elif request.path == self.WEB_API_PATH + 'poweron':
                 message = 'poweron?mac={}'
                 message = message.format(str(mac))
@@ -245,6 +250,8 @@ zipatoserver = Flask(__name__,
 @zipatoserver.route(Settings.WEB_API_PATH + 'poweroff')
 @zipatoserver.route(Settings.WEB_API_PATH + 'ping')
 @zipatoserver.route(Settings.WEB_API_PATH + 'save_settings', methods=['POST'])
+@zipatoserver.route(Settings.WEB_API_PATH + 'delete_param', methods=['DELETE'])
+@zipatoserver.route(Settings.WEB_API_PATH + 'add_param', methods=['PUT'])
 def index():
     """Handle incomming HTTP requests."""
     web_server = ZipatoServer()
