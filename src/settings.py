@@ -156,7 +156,13 @@ class Settings:
         return render_template('settings.html',
                                constants=constants,
                                comments=comments,
-                               save_path=Settings.WEB_API_PATH + 'save_settings')
+                               save_settings_path=(
+                                   Settings.WEB_API_PATH + 'save_settings'),
+                               remove_param_path=(
+                                   Settings.WEB_API_PATH + 'remove_param'),
+                               add_param_path=(
+                                   Settings.WEB_API_PATH + 'add_param')
+                               )
 
     @staticmethod
     def write_settings_to_file(settings_json, settings_path=None):

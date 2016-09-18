@@ -241,6 +241,7 @@ class Main(Settings):
 
 Settings.load_settings_from_yaml(settings_path='/etc/')
 zipatoserver = Flask(__name__,
+                     static_url_path="",
                      static_folder='html_static',
                      template_folder='html_templates')
 

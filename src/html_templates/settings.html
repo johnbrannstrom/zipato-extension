@@ -32,11 +32,11 @@
     </script>
     <script type="text/javascript">
     $(document).ready(function() {
-       $("#save_settings1").click(function() {
+       $("#save_settings1,#save_settings2").click(function() {
            var formData = $("#settings_form").formToJSON();
            $.ajax({
               type: "POST",
-              url: "{{ save_path }}",
+              url: "{{ save_settings_path }}",
               data: formData,
               success: function(){},
               dataType: "json",
@@ -45,13 +45,48 @@
         });
     });
     </script>
-    <button id='save_settings1' class="btn btn-success pull-right">
-        Save settings
+    {% for constant, value in constants.items() %}
+        {% if value is mapping %}
+        <script type="text/javascript">
+            $(document).ready(function() {
+               $("#{{ constant }}_add").click(function() {
+                   $.ajax({
+                      type: "PUT",
+                      url: "{{ add_param_path }}",
+                      data: { 'nisse': 'kalle' },
+                      success: function(){},
+                      dataType: "json",
+                      contentType : "application/json"
+                    });
+                });
+            });
+        </script>
+        {% for sub_header, sub_constants in value.items() %}
+        <script type="text/javascript">
+            $(document).ready(function() {
+               $("#{{ constant }}_{{ sub_header }}_remove").click(function() {
+                   $.ajax({
+                      type: "DELETE",
+                      url: "{{ remove_param_path }}",
+                      data: { 'nisse': 'kalle' },
+                      success: function(){},
+                      dataType: "json",
+                      contentType : "application/json"
+                    });
+                });
+            });
+        </script>
+        {% endfor %}
+        {% endif %}
+    {% endfor %}
+    <button id='save_settings1' class="btn btn-info pull-right">
+        <span class="glyphicon glyphicon-floppy-save"></span> Save
     </button>
     <form id="settings_form">
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th></th>
                     <th>Parameter</th>
                     <th colspan="2"></th>
                     <th>Value</th>
@@ -60,15 +95,29 @@
             <tbody>
                 {% for constant, value in constants.items() %}
                 <tr>
+                    <th></th>
                     <th colspan="4">{{ comments[constant] }}</th>
                 </tr>
                 {% if value is mapping %}
-                <tr><td colspan="4">{{ constant }}</td></tr>
+                <tr>
+                    <td>
+                        <span id="{{ constant }}_add" role="button"
+                              class="glyphicon glyphicon-plus-sign text-success add-param">
+                        </span>
+                    </td>
+                    <td colspan="3">{{ constant }}</td>
+                </tr>
                 {% for sub_header, sub_constants in value.items() %}
                     {% set header_line = True %}
                     {% for sub_constant, sub_value in sub_constants.items() %}
                     {% if header_line %}
                     <tr>
+                        <td>
+                            <span id="{{ constant }}_{{ sub_header }}_remove"
+                                  role="button"
+                                  class="glyphicon glyphicon-remove-sign text-danger remove-param">
+                            </span>
+                        </td>
                         <td></td>
                         <td>{{ sub_header }}</td>
                         <td colspan="2"></td>
@@ -76,7 +125,7 @@
                     </tr>
                     {% endif %}
                     <tr>
-                        <td colspan="2">
+                        <td colspan="3">
                         <td>{{ sub_constant }}</td>
                         <td>
                             <input size="35"
@@ -89,6 +138,7 @@
                 {% endfor %}
                 {% else %}
                 <tr>
+                    <td></td>
                     <td colspan="3">{{ constant }}</td>
                     <td>
                         <input size="35"
@@ -102,8 +152,8 @@
             </tbody>
         </table>
     </form>
-    <button id='save_settings2' class="btn btn-success pull-right">
-        Save settings
+    <button id='save_settings2' class="btn btn-info pull-right">
+        <span class="glyphicon glyphicon-floppy-save"></span> Save
     </button>
     <br>
 </div>
