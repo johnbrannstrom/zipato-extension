@@ -75,17 +75,7 @@ class Settings:
         with open(config_file, 'r') as f:
             constants = yaml.load(f)
         for constant, value in constants.items():
-            if constant in Settings.__PATH_WITH_SLASH_PARAMETERS:
-                setattr(Settings, constant, Settings._format_path(value, True))
-            elif constant in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
-                setattr(
-                    Settings, constant, Settings._format_path(value, False))
-            elif constant in Settings.__INTEGER_PARAMETERS:
-                setattr(Settings, constant, int(value))
-            elif constant in Settings.__BOOLEAN_PARAMETERS:
-                setattr(Settings, constant, bool(value))
-            else:
-                setattr(Settings, constant, value)
+            setattr(Settings, constant, Settings._format_value(constant, value))
 
     @staticmethod
     def _format_path(path, slash=True):
@@ -104,8 +94,31 @@ class Settings:
             return path + '/'
         elif not slash and path[-1] == '/':
             return path[:-1]
-        else:
-            return path
+        return path
+
+    @staticmethod
+    def _format_value(param, value):
+        """
+        Format parameter value.
+
+        :param str param: Name of the parameter to format.
+        :param str param: Value to format.
+        :rtype: str or bool
+        :return: A parameter with the correct type.
+
+        """
+        if param in Settings.__PATH_WITH_SLASH_PARAMETERS:
+            return Settings._format_path(value, True)
+        elif param in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
+            return Settings._format_path(value, False)
+        elif str(value).lower() == 'yes' or str(value).lower() == 'true':
+            return True
+        elif str(value).lower() == 'no' or str(value).lower() == 'false':
+            return False
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return value
 
     @staticmethod
     def render_settings_html(settings_path=None):
@@ -124,10 +137,7 @@ class Settings:
         with open(config_file, 'r') as f:
             constants = yaml.load(f)
         for constant, value in constants.items():
-            if constant in Settings.__PATH_WITH_SLASH_PARAMETERS:
-                constants[constant] = Settings._format_path(value, True)
-            elif constant in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
-                constants[constant] = Settings._format_path(value, False)
+            constants[constant] = Settings._format_value(constant, value)
         # Load comments from disk
         comments = {}
         file = open(config_file, encoding='utf-8')
@@ -183,14 +193,7 @@ class Settings:
                     comment = []
         # Set correct type of parameters
         for param, value in settings_json.items():
-            if param in Settings.__PATH_WITH_SLASH_PARAMETERS:
-                settings_json[param] = Settings._format_path(value, True)
-            elif param in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
-                settings_json[param] = Settings._format_path(value, False)
-            elif param in Settings.__INTEGER_PARAMETERS:
-                settings_json[param] = int(value)
-            elif param in Settings.__BOOLEAN_PARAMETERS:
-                settings_json[param] = bool(value)
+            settings_json[param] = Settings._format_value(param, value)
         # Create YAML with comments
         settings_yaml = yaml.dump(settings_json,
                                   default_flow_style=False,
@@ -210,8 +213,8 @@ class Settings:
                         for comment in comments:
                             settings_list.insert(i, comment)
                             i += 1
+                        del param_comments[param]
                         break
-                        del comments[param]
             i += 1
         settings_yaml = '\n'.join(settings_list)[1:]
         #  Write YAML to file
