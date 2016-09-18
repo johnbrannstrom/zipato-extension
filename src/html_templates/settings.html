@@ -69,7 +69,7 @@
                    $.ajax({
                       type: "DELETE",
                       url: "{{ remove_param_path }}",
-                      data: { 'nisse': 'kalle' },
+                      data: {'param': '{{ sub_header }}'},
                       success: function(){},
                       dataType: "json",
                       contentType : "application/json"

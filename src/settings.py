@@ -30,14 +30,6 @@ class Settings:
         'MESSAGE_LOG', 'ERROR_LOG', 'SSH_KEY_FILE']
     """(*list*) Parameters in this list will never end with a slash."""
 
-    __INTEGER_PARAMETERS = [
-        'PING_COUNT', 'PROCESSES', 'TCP_PORT']
-    """(*list*) Parameters in this list will be treated as integers."""
-
-    __BOOLEAN_PARAMETERS = [
-        'DEBUG']
-    """(*list*) Parameters in this list will be treated as boolean."""
-
     PROGRAM_PATH = None
     """(*str*) Path of the program."""
 

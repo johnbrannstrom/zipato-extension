@@ -147,17 +147,30 @@ class ZipatoServer(Settings, Debug):
             message = 'Zipato ping status could not be updated'
         return self._json_response(message, status_code)
 
-    def _save_settings(self):
+    def _save_settings(self, settings):
         """
         Save settings to disk.
 
+        :param json settings: Settings in Json format.
         :rtype: str
         :returns: Status message
 
         """
-        # TODO enter more code here
-        settings_json = request.get_json()
-        self.write_settings_to_file(settings_json, settings_path='/etc/')
+        self.write_settings_to_file(settings, settings_path='/etc/')
+        Settings.load_settings_from_yaml(settings_path='/etc/')
+        message = 'Settings written to file'
+        return self._json_response(message, 200)
+
+    def _remove_param(self, param):
+        """
+        Remove a parameter.
+
+        :param str param: PParameter to remove.
+        :rtype: str
+        :returns: Status message
+
+        """
+        self.write_settings_to_file(settings, settings_path='/etc/')
         Settings.load_settings_from_yaml(settings_path='/etc/')
         message = 'Settings written to file'
         return self._json_response(message, 200)
@@ -167,6 +180,7 @@ class ZipatoServer(Settings, Debug):
         user = request.args.get('user')
         host = request.args.get('host')
         mac = request.args.get('mac')
+        response_json = request.get_json()
         try:
             message = request.path
             if request.path == self.WEB_GUI_PATH:
@@ -177,20 +191,28 @@ class ZipatoServer(Settings, Debug):
                     poweron_path=Settings.WEB_API_PATH + 'poweron',
                     poweroff_path=Settings.WEB_API_PATH + 'poweroff')
             elif request.path == self.WEB_API_PATH + 'poweron':
-                message = 'poweron?mac={}'
+                message = 'poweron: mac={}'
                 message = message.format(str(mac))
                 result = self._poweron()
             elif request.path == self.WEB_API_PATH + 'poweroff':
-                message = 'poweroff?user={}&host={}'
+                message = 'poweroff: user={}, host={}'
                 message = message.format(str(user), str(host))
                 result = self._poweroff()
             elif request.path == self.WEB_API_PATH + 'ping':
-                message = 'ping?host={}'
+                message = 'ping: host={}'
                 message = message.format(str(host))
                 result = self._ping()
             elif request.path == self.WEB_API_PATH + 'save_settings':
                 message = 'save_settings'
-                result = self._save_settings()
+                result = self._save_settings(response_json)
+            elif request.path == self.WEB_API_PATH + 'remove_param':
+                print(response_json)  # TODO delete
+                param = None
+                if 'param' in response_json:
+                    param = response_json['param']
+                message = 'remove_param: param={}'
+                message = message.format(param)
+                result = self._remove_param(param)
         except:
             error_log = LogFile(self.ERROR_LOG)
             error_log.write(message)
@@ -256,6 +278,8 @@ zipatoserver = Flask(__name__,
 def index():
     """Handle incomming HTTP requests."""
     web_server = ZipatoServer()
+    print(request.path)  # TODO delete
+    print(request.get_json())  # TODO delete
     return web_server.handle_request()
 
 if __name__ == '__main__':
