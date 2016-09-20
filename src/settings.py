@@ -167,7 +167,7 @@ class Settings:
         """
         with open(config_file, 'r') as f:
             settings_json = yaml.load(f)
-        # TODO remove parameter from dict here and then write to disk as shown below        
+        del settings_json[value]
         self.write_settings_to_file(settings_json, settings_path='/etc')
 
     @staticmethod
@@ -185,7 +185,7 @@ class Settings:
             Comments are only supported on top level parameters.
 
         """
-        program_path = (ya
+        program_path = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
         config_file = Settings._get_config_file(settings_path, program_path)
         file_obj = open(config_file, 'r', encoding="utf-8")
