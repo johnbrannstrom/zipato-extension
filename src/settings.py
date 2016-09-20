@@ -157,6 +157,20 @@ class Settings:
                                )
 
     @staticmethod
+    def remove_value_from_file(param, value):
+        """
+        Remove a value from a parameter in the settings file.
+
+        :param str param: Parameter to remove value from.
+        :param str value: Value (dict) to remove from parameter.
+
+        """
+        with open(config_file, 'r') as f:
+            settings_json = yaml.load(f)
+        # TODO remove parameter from dict here and then write to disk as shown below        
+        self.write_settings_to_file(settings_json, settings_path='/etc')
+
+    @staticmethod
     def write_settings_to_file(settings_json, settings_path=None):
         """
         Write settings to file.
@@ -171,7 +185,7 @@ class Settings:
             Comments are only supported on top level parameters.
 
         """
-        program_path = (
+        program_path = (ya
             os.path.dirname(os.path.abspath(__file__)) + '/')
         config_file = Settings._get_config_file(settings_path, program_path)
         file_obj = open(config_file, 'r', encoding="utf-8")
