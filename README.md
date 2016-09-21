@@ -1,3 +1,9 @@
+Features
+--------
+* Adds the ability to ping IP network devices and then set the status of a virtual Zipato sensor.
+* Adds the ability to start IP network devices with wake-on-lan.
+* Adds the ability to shut down Linux hosts by logging on to the and issuing the *shutdown -r now* command.
+
 Environment requirements
 ------------------------
 
