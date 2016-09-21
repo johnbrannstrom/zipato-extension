@@ -11,7 +11,7 @@ This module prints debug messages to screen.
 
 
 class Debug:
-    """Helper class for debug printing."""
+    """Helper class for debug printing. """
 
     DEBUG = 0
     """(*Integer*) Current debug level."""
