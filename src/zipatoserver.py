@@ -201,7 +201,6 @@ class ZipatoServer(Settings, Debug):
 
     def handle_request(self):
         """Web server function."""
-        user = request.args.get('user')
         host = request.args.get('host')
         mac = request.args.get('mac')
         tab = request.args.get('tab')
@@ -223,8 +222,8 @@ class ZipatoServer(Settings, Debug):
                 message = message.format(str(mac))
                 result = self._poweron()
             elif request.path == self.WEB_API_PATH + 'poweroff':
-                message = 'poweroff: user={}, host={}'
-                message = message.format(str(user), str(host))
+                message = 'poweroff: host={}'
+                message = message.format(str(host))
                 result = self._poweroff()
             elif request.path == self.WEB_API_PATH + 'ping':
                 message = 'ping: host={}'
