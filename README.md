@@ -14,5 +14,5 @@ Installation instructions
 3. Copy the *zipatoserver_template.conf* file from the *other* folder in the master branch to */etc/zipatoserver.conf*.
 4. Make the *zipatoserver.py* application executable by running the following command *chmod +x /usr/local/bin/zipatoserver.py*.
 5. Start the *zipatoserver.py* application by running the following command */usr/local/bin/zipatoserver.py*.
-6. Instructions of usage can be found by opening your favourite browser and navigating to the *zipatoserver* application as shown below:
+6. Instructions of usage can be found by opening your favourite browser and navigating to the *zipatoserver* application as shown in the following example:
 http://ip.address.or.hostname.of.your.server:8080
