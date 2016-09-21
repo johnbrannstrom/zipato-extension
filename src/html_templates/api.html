@@ -1,37 +1,32 @@
-<div id="api"
-     class="tab-pane fade {{ TODO enter code here}}">
+<h3>Available API commands</h3>
 
-    <h3>Available API commands</h3>
+<div class="well">
+    <h4><a href="{{ ping_path }}" target="_blank">Ping</a></h4>
+    To be able to use the ping command, the host must first be added in
+    <em>settings</em>. When that has been done, the ping
+    command will ping a host and report the status back via the Zipato API.
+</div>
 
-    <div class="well">
-        <h4><a href="{{ ping_path }}" target="_blank">Ping</a></h4>
-        To be able to use the ping command, the host must first be added in
-        <em>settings</em>. When that has been done, the ping
-        command will ping a host and report the status back via the Zipato API.
+<div class="well">
+    <h4><a href="{{ poweron_path }}" target="_blank">Power on</a></h4>
+    The poweron command will attempt to start a host by sending it a wake on
+    LAN packet.<br><br>
+    <div class="alert alert-info">
+        <strong>Requires</strong> This command requires <em>wakeonlan</em>
+        to be installed on the server running <em>Zipato extension server
+        </em>.
     </div>
+ </div>
 
-    <div class="well">
-        <h4><a href="{{ poweron_path }}" target="_blank">Power on</a></h4>
-        The poweron command will attempt to start a host by sending it a wake on
-        LAN packet.<br><br>
-        <div class="alert alert-info">
-            <strong>Requires</strong> This command requires <em>wakeonlan</em>
-            to be installed on the server running <em>Zipato extension server
-            </em>.
-        </div>
-     </div>
-
-    <div class="well">
-        <h4><a href="{{ poweroff_path }}" target="_blank">Power off</a></h4>
-        To be able to use the poweroff command, the host must first be added in
-        <em>settings</em>.
-        The poweroff command will attempt to shut down a host by logging in to
-        it and running the <code>shutdown -h now</code>.<br><br>
-        <div class="alert alert-info">
-            <strong>Requires</strong> For this to work, a pair of authentication
-            keys will have to be set up between the <em>Zipato extension
-            server</em> and the target host.
-        </div>
+<div class="well">
+    <h4><a href="{{ poweroff_path }}" target="_blank">Power off</a></h4>
+    To be able to use the poweroff command, the host must first be added in
+    <em>settings</em>.
+    The poweroff command will attempt to shut down a host by logging in to
+    it and running the <code>shutdown -h now</code>.<br><br>
+    <div class="alert alert-info">
+        <strong>Requires</strong> For this to work, a pair of authentication
+        keys will have to be set up between the <em>Zipato extension
+        server</em> and the target host.
     </div>
-
 </div>

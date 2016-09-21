@@ -183,6 +183,22 @@ class ZipatoServer(Settings, Debug):
         message = message.format(param, value)
         return self._json_response(message, 200)
 
+    def _add_param_value(self, param, value):
+        """
+        Add value to a parameter in the settings file.
+
+        :param str param: Parameter to add value to.
+        :param str value: Value to add.
+        :rtype: str
+        :returns: Status message
+
+        """
+        self.add_param_value_to_file(param, value, settings_path='/etc/')
+        Settings.load_settings_from_yaml(settings_path='/etc/')
+        message = "Value '{}' added to parameter '{}'"
+        message = message.format(param, value)
+        return self._json_response(message, 200)
+
     def handle_request(self):
         """Web server function."""
         user = request.args.get('user')
@@ -194,8 +210,11 @@ class ZipatoServer(Settings, Debug):
             message = request.path
             if request.path == self.WEB_GUI_PATH:
                 settings = self.render_settings_html(settings_path='/etc/')
+                active_tab = 'about'
+                if tab is not None:
+                    active_tab = tab
                 result = render_template(
-                    'index.html', settings=settings, active_tab=tab,
+                    'index.html', settings=settings, active_tab=active_tab,
                     ping_path=Settings.WEB_API_PATH + 'ping',
                     poweron_path=Settings.WEB_API_PATH + 'poweron',
                     poweroff_path=Settings.WEB_API_PATH + 'poweroff')
@@ -224,6 +243,15 @@ class ZipatoServer(Settings, Debug):
                 message = 'delete_param_value: param={}, value={}'
                 message = message.format(param, value)
                 result = self._delete_param_value(param, value)
+            elif request.path == self.WEB_API_PATH + 'add_param_value':
+                param = None
+                if 'param' in response_json:
+                    param = response_json['param']
+                if 'value' in response_json:
+                    value = response_json['value']
+                message = 'add_param_value: param={}, value={}'
+                message = message.format(param, value)
+                result = self._add_param_value(param, value)
         except:
             error_log = LogFile(self.ERROR_LOG)
             error_log.write(message)

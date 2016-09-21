@@ -181,7 +181,7 @@ class Settings:
     @staticmethod
     def add_param_value_to_file(param, value, settings_path=None):
         """
-        Add a blank value to a parameter in the settings file.
+        Add value to a parameter in the settings file.
 
         :param str param: Parameter to add value to.
         :param str value: Value to add.
@@ -195,8 +195,8 @@ class Settings:
         config_file = Settings._get_config_file(settings_path, program_path)
         with open(config_file, 'r') as f:
             settings_json = yaml.load(f)
-        blank_value = settings_json[settings_json.keys()[0]]
-        blank_value = {key: '' for key in blank_value.items()}
+        blank_value = list(settings_json[param].values())[0]
+        blank_value = {key: '' for key, value in blank_value.items()}
         settings_json[param][value] = blank_value
         Settings.write_settings_to_file(settings_json,
                                         settings_path=settings_path)

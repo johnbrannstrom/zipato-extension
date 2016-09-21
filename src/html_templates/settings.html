@@ -1,162 +1,173 @@
-<div id="settings"
-     class="tab-pane fade {{ TODO enter code here}}">
-    <script type="text/javascript">
-    // This was written by  JanPaulEttles
-    $.fn.formToJSON = function() {
-        var objectGraph = {};
-        function add(objectGraph, name, value) {
-            if(name.length == 1) {
-                //if the array is now one element long, we're done
-                objectGraph[name[0]] = value;
+<script type="text/javascript">
+// This was originally written by JanPaulEttles
+// (and later modified by John Brännström)
+$.fn.formToJSON = function() {
+    var objectGraph = {};
+    function add(objectGraph, name, value) {
+        if(name.length == 1) {
+            //if the array is now one element long, we're done
+            objectGraph[name[0]] = value;
+        }
+        else {
+            //else we've still got more than a single element of depth
+            if(objectGraph[name[0]] == null) {
+                //create the node if it doesn't yet exist
+                objectGraph[name[0]] = {};
             }
-            else {
-                //else we've still got more than a single element of depth
-                if(objectGraph[name[0]] == null) {
-                    //create the node if it doesn't yet exist
-                    objectGraph[name[0]] = {};
-                }
-            //recurse, chopping off the first array element
-                add(objectGraph[name[0]], name.slice(1), value);
-            }
-        };
-        //loop through all of the input/textarea elements of the form
-        //this.find('input, textarea').each(function() {
-        $(this).find('input').each(function() {
-            //ignore the submit button
-            if($(this).attr('name') != 'submit') {
-                //split the dot notated names into arrays and pass along with the value
-                add(objectGraph, $(this).attr('name').split('_-'), $(this).val());
-            }
-        });
-        return JSON.stringify(objectGraph);
+        //recurse, chopping off the first array element
+            add(objectGraph[name[0]], name.slice(1), value);
+        }
     };
-    </script>
-    <script type="text/javascript">
-    $(document).ready(function() {
-       $("#save_settings1,#save_settings2").click(function() {
-           var formData = $("#settings_form").formToJSON();
-           $.ajax({
-              type: "POST",
-              url: "{{ save_settings_path }}",
-              data: formData,
-              success: function(){},
-              dataType: "json",
-              contentType : "application/json"
-           });
-       });
+    //loop through all of the input/textarea elements of the form
+    //this.find('input, textarea').each(function() {
+    $(this).find('input').each(function() {
+        //ignore input elements with names that start with a '_'
+        if($(this).attr('name').charAt(0) != '_') {
+            //split the '_-' notated names into arrays and pass with the value
+            add(objectGraph, $(this).attr('name').split('_-'), $(this).val());
+        }
     });
+    return JSON.stringify(objectGraph);
+};
+</script>
+<script type="text/javascript">
+$(document).ready(function() {
+   $("#save_settings1,#save_settings2").click(function() {
+       var formData = $("#settings_form").formToJSON();
+       $.ajax({
+          type: "POST",
+          url: "{{ save_settings_path }}",
+          data: formData,
+          success: function(){
+              window.location.href = '/?tab=settings';
+          },
+          dataType: "json",
+          contentType : "application/json"
+       });
+   });
+});
+</script>
+{% for constant, value in constants.items() %}
+    {% if value is mapping %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+           $("#{{ constant }}_add").click(function() {
+               value = document.getElementById(
+                   'new_{{ constant }}_value').value;
+               $.ajax({
+                  type: "PUT",
+                  url: "{{ add_param_path }}",
+                  data: JSON.stringify({
+                      'param': '{{ constant }}',
+                      'value': value}),
+                  success: function(){
+                      window.location.href = '/?tab=settings';
+                  },
+                  dataType: "json",
+                  contentType : "application/json"
+               });
+           });
+        });
     </script>
-    {% for constant, value in constants.items() %}
-        {% if value is mapping %}
-        <script type="text/javascript">
-            $(document).ready(function() {
-               $("#{{ constant }}_add").click(function() {
-                   $.ajax({
-                      type: "PUT",
-                      url: "{{ add_param_path }}",
-                      data: JSON.stringify({'param': '{{ constant }}'}),
-                      dataType: "json",
-                      contentType : "application/json"
-                   });
+    {% for sub_header, sub_constants in value.items() %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+           $("#{{ constant }}_{{ sub_header|replace('.', '_') }}_delete").click(function() {
+               $.ajax({
+                  type: "DELETE",
+                  url: "{{ delete_param_path }}",
+                  data: JSON.stringify({
+                      'param': '{{ constant }}',
+                      'value': '{{ sub_header }}'}),
+                  success: function(){
+                      window.location.href = '/?tab=settings';
+                  },
+                  dataType: "json",
+                  contentType : "application/json"
                });
-            });
-        </script>
-        {% for sub_header, sub_constants in value.items() %}
-        <script type="text/javascript">
-            $(document).ready(function() {
-               $("#{{ constant }}_{{ sub_header|replace('.', '_') }}_delete").click(function() {
-                   $.ajax({
-                      type: "DELETE",
-                      url: "{{ delete_param_path }}",
-                      data: JSON.stringify({
-                          'param': '{{ constant }}',
-                          'value': '{{ sub_header }}'}),
-                      dataType: "json",
-                      contentType : "application/json"
-                   });
-                   setTimeout(function(){location.reload(true);}, 200);
-               });
-            });
-        </script>
-        {% endfor %}
-        {% endif %}
+           });
+        });
+    </script>
     {% endfor %}
-    <button id='save_settings1' class="btn btn-info pull-right">
-        <span class="glyphicon glyphicon-floppy-save"></span> Save
-    </button>
-    <form id="settings_form">
-        <table class="table table-striped">
-            <thead>
+    {% endif %}
+{% endfor %}
+<button id='save_settings1' class="btn btn-info pull-right">
+    <span class="glyphicon glyphicon-floppy-save"></span> Save
+</button>
+<form id="settings_form">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th colspan="2"></th>
+                <th>Value</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for constant, value in constants.items() %}
+            <tr>
+                <th colspan="4">{{ comments[constant] }}</th>
+                <th></th>
+            </tr>
+            {% if value is mapping %}
+            <tr>
+                <td colspan="3">{{ constant }}</td>
+                <td><input size="35" type="text"value="" name="_"
+                           id="new_{{ constant }}_value"/></td>
+                <td>
+                    <span id="{{ constant }}_add" role="button"
+                          class="glyphicon glyphicon-plus-sign text-success add-param">
+                    </span>
+                </td>
+            </tr>
+            {% for sub_header, sub_constants in value.items() %}
+                {% set header_line = True %}
+                {% for sub_constant, sub_value in sub_constants.items() %}
+                {% if header_line %}
                 <tr>
-                    <th>Parameter</th>
-                    <th colspan="2"></th>
-                    <th>Value</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for constant, value in constants.items() %}
-                <tr>
-                    <th colspan="4">{{ comments[constant] }}</th>
-                    <th></th>
-                </tr>
-                {% if value is mapping %}
-                <tr>
-                    <td colspan="4">{{ constant }}</td>
+                    <td></td>
+                    <td>{{ sub_header }}</td>
+                    <td colspan="2"></td>
                     <td>
-                        <span id="{{ constant }}_add" role="button"
-                              class="glyphicon glyphicon-plus-sign text-success add-param">
+                        <span id="{{ constant }}_{{ sub_header|replace('.', '_') }}_delete"
+                              role="button"
+                              class="glyphicon glyphicon-remove-sign text-danger delete-param">
                         </span>
                     </td>
+                {% set header_line = False %}
                 </tr>
-                {% for sub_header, sub_constants in value.items() %}
-                    {% set header_line = True %}
-                    {% for sub_constant, sub_value in sub_constants.items() %}
-                    {% if header_line %}
-                    <tr>
-                        <td></td>
-                        <td>{{ sub_header }}</td>
-                        <td colspan="2"></td>
-                        <td>
-                            <span id="{{ constant }}_{{ sub_header|replace('.', '_') }}_delete"
-                                  role="button"
-                                  class="glyphicon glyphicon-remove-sign text-danger delete-param">
-                            </span>
-                        </td>
-                    {% set header_line = False %}
-                    </tr>
-                    {% endif %}
-                    <tr>
-                        <td colspan="2"></td>
-                        <td>{{ sub_constant }}</td>
-                        <td>
-                            <input size="35"
-                                   type="text"
-                                   value="{{ sub_value }}"
-                                   name="{{ constant }}_-{{ sub_header }}_-{{ sub_constant }}"/>
-                        </td>
-                        <td></td>
-                    </tr>
-                    {% endfor %}
-                {% endfor %}
-                {% else %}
+                {% endif %}
                 <tr>
-                    <td colspan="3">{{ constant }}</td>
+                    <td colspan="2"></td>
+                    <td>{{ sub_constant }}</td>
                     <td>
                         <input size="35"
                                type="text"
-                               value="{{ value }}"
-                               name="{{ constant }}"/>
+                               value="{{ sub_value }}"
+                               name="{{ constant }}_-{{ sub_header }}_-{{ sub_constant }}"/>
                     </td>
                     <td></td>
                 </tr>
-                {% endif %}
                 {% endfor %}
-            </tbody>
-        </table>
-    </form>
-    <button id='save_settings2' class="btn btn-info pull-right">
-        <span class="glyphicon glyphicon-floppy-save"></span> Save
-    </button>
-    <br><br><br>
-</div>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="3">{{ constant }}</td>
+                <td>
+                    <input size="35"
+                           type="text"
+                           value="{{ value }}"
+                           name="{{ constant }}"/>
+                </td>
+                <td></td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</form>
+<button id='save_settings2' class="btn btn-info pull-right">
+    <span class="glyphicon glyphicon-floppy-save"></span> Save
+</button>
+<br><br><br>

@@ -21,14 +21,13 @@
         <div class="col-sm-8">
             <br>
             <ul class="nav nav-pills">
-                <!-- TODO changed code on selecting tabs here -->
-                <li class="<%= 'active' if params[:controller] == 'home' %>">
+                <li class="{% if active_tab == 'about' %}active{% endif %}">
                     <a data-toggle="tab" href="#about">About</a>
                 </li>
-                <li  class="<%= 'active' if params[:controller] == 'home' %>">
+                <li  class="{% if active_tab == 'settings' %}active{% endif %}">
                     <a data-toggle="tab" href="#settings">Settings</a>
                 </li>
-                <li class="<%= 'active' if params[:controller] == 'home' %>">
+                <li class="{% if active_tab == 'api' %}active{% endif %}">
                     <a data-toggle="tab" href="#api">API</a>
                 </li>
             </ul>
@@ -41,11 +40,20 @@
         <div class="col-sm-2"></div>
         <div class="col-sm-8">
             <div class="tab-content">
-                {% include 'about.html' %}
-                {{ settings | safe }}
-                {% with ping_path=ping_path %}
-                    {% include 'api.html' %}
-                {% endwith %}
+                <div id="about"
+                     class="tab-pane fade {% if active_tab == 'about' %}in active{% endif %}">
+                    {% include 'about.html' %}
+                </div>
+                <div id="settings"
+                     class="tab-pane fade {% if active_tab == 'settings' %}in active{% endif %}">
+                    {{ settings | safe }}
+                </div>
+                <div id="api"
+                     class="tab-pane fade {% if active_tab == 'api' %}in active{% endif %}">
+                    {% with ping_path=ping_path %}
+                        {% include 'api.html' %}
+                    {% endwith %}
+                </div>
             </div>
         </div>
         <div class="col-sm-2"></div>
