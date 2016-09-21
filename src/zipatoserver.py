@@ -99,6 +99,7 @@ class ZipatoServer(Settings, Debug):
         message = codecs.decode(stdout + stderr, 'utf-8')
         return self._json_response(message, 200)
 
+    # noinspection PyShadowingNames
     def _ping(self):
         """
         Ping a node and set Zipato status.
@@ -147,6 +148,7 @@ class ZipatoServer(Settings, Debug):
             message = 'Zipato ping status could not be updated'
         return self._json_response(message, status_code)
 
+    # noinspection PyTypeChecker
     def _save_settings(self, settings):
         """
         Save settings to disk.
@@ -161,18 +163,24 @@ class ZipatoServer(Settings, Debug):
         message = 'Settings written to file'
         return self._json_response(message, 200)
 
-    def _remove_param(self, param):
+    def _delete_param_value(self, param, value):
         """
-        Remove a parameter.
+        Remove a value from a parameter in the settings file.
 
-        :param str param: PParameter to remove.
+        :param str param: Parameter to delete value from.
+        :param str value: Value to delete.
         :rtype: str
         :returns: Status message
 
         """
-        self.write_settings_to_file(settings, settings_path='/etc/')
+        status = self.delete_param_value_from_file(
+            param, value, settings_path='/etc/')
         Settings.load_settings_from_yaml(settings_path='/etc/')
-        message = 'Settings written to file'
+        if status:
+            message = "Value '{}' deleted from parameter '{}'"
+        else:
+            message = "Value '{}' NOT deleted from parameter '{}'"
+        message = message.format(param, value)
         return self._json_response(message, 200)
 
     def handle_request(self):
@@ -180,13 +188,14 @@ class ZipatoServer(Settings, Debug):
         user = request.args.get('user')
         host = request.args.get('host')
         mac = request.args.get('mac')
+        tab = request.args.get('tab')
         response_json = request.get_json()
         try:
             message = request.path
             if request.path == self.WEB_GUI_PATH:
                 settings = self.render_settings_html(settings_path='/etc/')
                 result = render_template(
-                    'index.html', settings=settings,
+                    'index.html', settings=settings, active_tab=tab,
                     ping_path=Settings.WEB_API_PATH + 'ping',
                     poweron_path=Settings.WEB_API_PATH + 'poweron',
                     poweroff_path=Settings.WEB_API_PATH + 'poweroff')
@@ -205,14 +214,16 @@ class ZipatoServer(Settings, Debug):
             elif request.path == self.WEB_API_PATH + 'save_settings':
                 message = 'save_settings'
                 result = self._save_settings(response_json)
-            elif request.path == self.WEB_API_PATH + 'remove_param':
-                print(response_json)  # TODO delete
+            elif request.path == self.WEB_API_PATH + 'delete_param_value':
                 param = None
+                value = None
                 if 'param' in response_json:
                     param = response_json['param']
-                message = 'remove_param: param={}'
-                message = message.format(param)
-                result = self._remove_param(param)
+                if 'value' in response_json:
+                    value = response_json['value']
+                message = 'delete_param_value: param={}, value={}'
+                message = message.format(param, value)
+                result = self._delete_param_value(param, value)
         except:
             error_log = LogFile(self.ERROR_LOG)
             error_log.write(message)
@@ -273,13 +284,12 @@ zipatoserver = Flask(__name__,
 @zipatoserver.route(Settings.WEB_API_PATH + 'poweroff')
 @zipatoserver.route(Settings.WEB_API_PATH + 'ping')
 @zipatoserver.route(Settings.WEB_API_PATH + 'save_settings', methods=['POST'])
-@zipatoserver.route(Settings.WEB_API_PATH + 'remove_param', methods=['DELETE'])
-@zipatoserver.route(Settings.WEB_API_PATH + 'add_param', methods=['PUT'])
+@zipatoserver.route(Settings.WEB_API_PATH + 'delete_param_value',
+                    methods=['DELETE'])
+@zipatoserver.route(Settings.WEB_API_PATH + 'add_param_value', methods=['PUT'])
 def index():
-    """Handle incomming HTTP requests."""
+    """Handle incoming HTTP requests."""
     web_server = ZipatoServer()
-    print(request.path)  # TODO delete
-    print(request.get_json())  # TODO delete
     return web_server.handle_request()
 
 if __name__ == '__main__':

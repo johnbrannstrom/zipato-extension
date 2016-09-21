@@ -1,4 +1,5 @@
-<div id="settings" class="tab-pane fade">
+<div id="settings"
+     class="tab-pane fade {{ TODO enter code here}}">
     <script type="text/javascript">
     // This was written by  JanPaulEttles
     $.fn.formToJSON = function() {
@@ -41,8 +42,8 @@
               success: function(){},
               dataType: "json",
               contentType : "application/json"
-            });
-        });
+           });
+       });
     });
     </script>
     {% for constant, value in constants.items() %}
@@ -53,28 +54,28 @@
                    $.ajax({
                       type: "PUT",
                       url: "{{ add_param_path }}",
-                      data: { 'nisse': 'kalle' },
-                      success: function(){},
+                      data: JSON.stringify({'param': '{{ constant }}'}),
                       dataType: "json",
                       contentType : "application/json"
-                    });
-                });
+                   });
+               });
             });
         </script>
         {% for sub_header, sub_constants in value.items() %}
-
-    <script type="text/javascript">
+        <script type="text/javascript">
             $(document).ready(function() {
-               $("#{{ constant }}_{{ sub_header|replace('.', '_') }}_remove").click(function() {
+               $("#{{ constant }}_{{ sub_header|replace('.', '_') }}_delete").click(function() {
                    $.ajax({
                       type: "DELETE",
-                      url: "{{ remove_param_path }}",
-                      data: {'param': '{{ sub_header }}'},
-                      success: function(){},
+                      url: "{{ delete_param_path }}",
+                      data: JSON.stringify({
+                          'param': '{{ constant }}',
+                          'value': '{{ sub_header }}'}),
                       dataType: "json",
                       contentType : "application/json"
-                    });
-                });
+                   });
+                   setTimeout(function(){location.reload(true);}, 200);
+               });
             });
         </script>
         {% endfor %}
@@ -87,46 +88,46 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th></th>
                     <th>Parameter</th>
                     <th colspan="2"></th>
                     <th>Value</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 {% for constant, value in constants.items() %}
                 <tr>
-                    <th></th>
                     <th colspan="4">{{ comments[constant] }}</th>
+                    <th></th>
                 </tr>
                 {% if value is mapping %}
                 <tr>
+                    <td colspan="4">{{ constant }}</td>
                     <td>
                         <span id="{{ constant }}_add" role="button"
                               class="glyphicon glyphicon-plus-sign text-success add-param">
                         </span>
                     </td>
-                    <td colspan="3">{{ constant }}</td>
                 </tr>
                 {% for sub_header, sub_constants in value.items() %}
                     {% set header_line = True %}
                     {% for sub_constant, sub_value in sub_constants.items() %}
                     {% if header_line %}
                     <tr>
-                        <td>
-                            <span id="{{ constant }}_{{ sub_header|replace('.', '_') }}_remove"
-                                  role="button"
-                                  class="glyphicon glyphicon-remove-sign text-danger remove-param">
-                            </span>
-                        </td>
                         <td></td>
                         <td>{{ sub_header }}</td>
                         <td colspan="2"></td>
+                        <td>
+                            <span id="{{ constant }}_{{ sub_header|replace('.', '_') }}_delete"
+                                  role="button"
+                                  class="glyphicon glyphicon-remove-sign text-danger delete-param">
+                            </span>
+                        </td>
                     {% set header_line = False %}
                     </tr>
                     {% endif %}
                     <tr>
-                        <td colspan="3">
+                        <td colspan="2"></td>
                         <td>{{ sub_constant }}</td>
                         <td>
                             <input size="35"
@@ -134,12 +135,12 @@
                                    value="{{ sub_value }}"
                                    name="{{ constant }}_-{{ sub_header }}_-{{ sub_constant }}"/>
                         </td>
+                        <td></td>
                     </tr>
                     {% endfor %}
                 {% endfor %}
                 {% else %}
                 <tr>
-                    <td></td>
                     <td colspan="3">{{ constant }}</td>
                     <td>
                         <input size="35"
@@ -147,6 +148,7 @@
                                value="{{ value }}"
                                name="{{ constant }}"/>
                     </td>
+                    <td></td>
                 </tr>
                 {% endif %}
                 {% endfor %}
@@ -156,5 +158,5 @@
     <button id='save_settings2' class="btn btn-info pull-right">
         <span class="glyphicon glyphicon-floppy-save"></span> Save
     </button>
-    <br>
+    <br><br><br>
 </div>

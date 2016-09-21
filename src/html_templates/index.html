@@ -21,11 +21,16 @@
         <div class="col-sm-8">
             <br>
             <ul class="nav nav-pills">
-                <li class="active">
+                <!-- TODO changed code on selecting tabs here -->
+                <li class="<%= 'active' if params[:controller] == 'home' %>">
                     <a data-toggle="tab" href="#about">About</a>
                 </li>
-                <li><a data-toggle="tab" href="#settings">Settings</a></li>
-                <li><a data-toggle="tab" href="#api">API</a></li>
+                <li  class="<%= 'active' if params[:controller] == 'home' %>">
+                    <a data-toggle="tab" href="#settings">Settings</a>
+                </li>
+                <li class="<%= 'active' if params[:controller] == 'home' %>">
+                    <a data-toggle="tab" href="#api">API</a>
+                </li>
             </ul>
             <br>
         </div>

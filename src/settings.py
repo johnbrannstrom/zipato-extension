@@ -145,27 +145,24 @@ class Settings:
                 if re.match(regex, lines[i]):
                     constant = key
                     comments[constant] = ''
-        return render_template('settings.html',
-                               constants=constants,
-                               comments=comments,
-                               save_settings_path=(
-                                   Settings.WEB_API_PATH + 'save_settings'),
-                               remove_param_path=(
-                                   Settings.WEB_API_PATH + 'remove_param'),
-                               add_param_path=(
-                                   Settings.WEB_API_PATH + 'add_param')
-                               )
+        return render_template(
+            'settings.html', constants=constants, comments=comments,
+            save_settings_path=(Settings.WEB_API_PATH + 'save_settings'),
+            delete_param_path=(Settings.WEB_API_PATH + 'delete_param_value'),
+            add_param_path=(Settings.WEB_API_PATH + 'add_param_value'))
 
     @staticmethod
-    def remove_value_from_param(param, value, settings_path=None):
+    def delete_param_value_from_file(param, value, settings_path=None):
         """
         Remove a value from a parameter in the settings file.
 
-        :param str param: Parameter to remove value from.
-        :param str value: Value (dict) to remove from parameter.
+        :param str value: Value to delete.
+        :param str param: Parameter to delete value from.
         :param str settings_path: If supplied this will determine the location
                                   of the YAML file. If not, YAML file will be
                                   written/read to/from the current directory.
+        :rtype: boolean
+        :returns: If the value was deleted from the parameter.
 
         """
         program_path = (
@@ -173,16 +170,21 @@ class Settings:
         config_file = Settings._get_config_file(settings_path, program_path)
         with open(config_file, 'r') as f:
             settings_json = yaml.load(f)
-        del settings_json[value]
-        Settings.write_settings_to_file(settings_json, settings_path=settings_path)
+        status = False
+        if len(settings_json[param]) > 1:
+            del settings_json[param][value]
+            status = True
+        Settings.write_settings_to_file(
+            settings_json, settings_path=settings_path)
+        return status
 
     @staticmethod
-    def add_blank_value_to_param(param, value, settings_path=None):
+    def add_param_value_to_file(param, value, settings_path=None):
         """
         Add a blank value to a parameter in the settings file.
 
         :param str param: Parameter to add value to.
-        :param str value: Value (dict) to add to parameter.
+        :param str value: Value to add.
         :param str settings_path: If supplied this will determine the location
                                   of the YAML file. If not, YAML file will be
                                   written/read to/from the current directory.
@@ -194,9 +196,10 @@ class Settings:
         with open(config_file, 'r') as f:
             settings_json = yaml.load(f)
         blank_value = settings_json[settings_json.keys()[0]]
-        blank_value = {key = '' for key}
-        # TODO add code to add parameter here
-        Settings.write_settings_to_file(settings_json, settings_path=settings_path)
+        blank_value = {key: '' for key in blank_value.items()}
+        settings_json[param][value] = blank_value
+        Settings.write_settings_to_file(settings_json,
+                                        settings_path=settings_path)
 
     @staticmethod
     def write_settings_to_file(settings_json, settings_path=None):
