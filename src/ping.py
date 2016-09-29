@@ -19,7 +19,7 @@ class Main(Settings):
             ep = self.API_PING_HOSTS[host]['ep']
             apikey = self.API_PING_HOSTS[host]['apikey']
         else:
-            message = "Host '{}' has not been configured for 'ping'!"
+            message = "ping host={}, status='Host has not been configured for ping'"
             message = message.format(host)
             return self._json_response(message, 400)
         for i in range(self.PING_COUNT):
@@ -34,22 +34,17 @@ class Main(Settings):
             if ping_ok:
                 break
             sleep(self.PING_INTERVAL)
-        serial = self.ZIPATO_SERIAL
         # Set the status of a Zipato sensor to the ping status
         command = ("https://my.zipato.com/zipato-web/remoting/attribute/se"
                    "t?serial={}&ep={}&apiKey={}&state={}")
+        zipato_connection = ZipatoConnection(self.ZIPATO_SERIAL)
         if ping_ok:
-            command = command.format(serial, ep, apikey, 'true')
+            zipato_connection.set_sensor_status(ep=ep, apikey=apikey, status='true')
         else:
-            command = command.format(serial, ep, apikey, 'false')
+            zipato_connection.set_sensor_status(ep=ep, apikey=apikey, status='false')
         self.debug_print(10, command, 'zipatoserver', 'ZipatoServer', '_ping')
-        r = requests.get(command)
-        status_code = r.status_code
-        if status_code == 200:
-            message = 'Zipato ping status was updated'
-        else:
-            message = 'Zipato ping status could not be updated'
-        return self._json_response(message, status_code)
+        zipato_connection.set_sensor_status(ep=ep, apikey=apikey, status)
+        message = 'ping host={}, status={}'.format(host, status)
       
       
       except:
@@ -64,7 +59,6 @@ class Main(Settings):
         message_log = LogFile(self.MESSAGE_LOG)
         message_log.write(message)
         message_log.close()
-        return result
       
     @staticmethod
     def _parse_command_line_options():
