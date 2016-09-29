@@ -9,18 +9,17 @@ class Main(Settings):
 
     def ping(self, host):
         """
-        Ping a node and set Zipato status.
+        Ping one host and set status to a Zipato sensor.
         
         :param str host: Target host.
         :rtype: str
         :returns: Status message
         """
-        host = request.args.get('host')
         if host in self.API_PING_HOSTS.keys():
             ep = self.API_PING_HOSTS[host]['ep']
             apikey = self.API_PING_HOSTS[host]['apikey']
         else:
-            message = "Error host '{}' has not been configured for 'ping'!"
+            message = "Host '{}' has not been configured for 'ping'!"
             message = message.format(host)
             return self._json_response(message, 400)
         for i in range(self.PING_COUNT):
@@ -34,7 +33,7 @@ class Main(Settings):
             ping_ok = result is None
             if ping_ok:
                 break
-            sleep(5)
+            sleep(self.PING_INTERVAL)
         serial = self.ZIPATO_SERIAL
         # Set the status of a Zipato sensor to the ping status
         command = ("https://my.zipato.com/zipato-web/remoting/attribute/se"
@@ -77,9 +76,9 @@ class Main(Settings):
         """
         debug_help = 'Debugging printout level.'
         host_help = 'Host or IP address to get ping status for.'
-        description = 'Ping one host and set status to Zipato sensor.'
+        description = 'Ping one host and set status to a Zipato sensor.'
         parser = argparse.ArgumentParser(description=description)
-        parser.add_argument('-i, '--host', type=str, help=host_help, required=True)
+        parser.add_argument('-o, '--host', type=str, help=host_help, required=True)
         parser.add_argument('--debug', type=int, default=0,
                             help=debug_help, required=False)
         args = parser.parse_args()
@@ -93,6 +92,7 @@ class Main(Settings):
         args = self._parse_command_line_options()
         Settings.load_settings_from_yaml(settings_path='/etc/')
         Settings.DEBUG = args.debug
+        self._ping(host)
 
 if __name__ == '__main__':
     main = Main()
