@@ -1,8 +1,18 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""
+.. moduleauthor:: John Brännström <john.brannstrom@gmail.com>
+
+Ping
+****
+
+This module will
+
+"""
 
 import subprocess
 import argparse
+from settings import Settings
 
 class Main(Settings):
   """Contains the script."""

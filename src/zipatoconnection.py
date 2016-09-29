@@ -1,11 +1,21 @@
-<<<<<<< HEAD
-asdf
-=======
+# -*- coding: utf-8 -*-
+"""
+.. moduleauthor:: John Brännström <john.brannstrom@gmail.com>
+
+Zipato Connection
+*****************
+
+This module handles connections to the Zipato cloud.
+
+"""
+
+
 import requests
+from settings import Settings
 
 class ZipatoConnection(Settings):
 
-    __init__(self, serial):
+    def __init__(self, serial):
         """
         Initializes a ZipatoConnection.
     
