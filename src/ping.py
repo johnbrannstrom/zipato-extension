@@ -67,9 +67,29 @@ class Main(Settings):
         message_log.close()
         return result
       
+    @staticmethod
+    def _parse_command_line_options():
+        """
+        Parse options from the command line.
+        
+        :rtype: Namespace
+        
+        """
+        debug_help = 'Debugging printout level.'
+        host_help = 'Host or IP address to get ping status for.'
+        description = 'Ping one host and set status to Zipato sensor.'
+        parser = argparse.ArgumentParser(description=description)
+        parser.add_argument('-i, '--host', type=str, help=host_help, required=True)
+        parser.add_argument('--debug', type=int, default=0,
+                            help=debug_help, required=False)
+        args = parser.parse_args()
+        return args
       
     def run(self):
-        """Run the script"""
+        """
+        Run the script.
+        
+        """
         args = self._parse_command_line_options()
         Settings.load_settings_from_yaml(settings_path='/etc/')
         Settings.DEBUG = args.debug
