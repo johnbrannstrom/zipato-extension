@@ -29,8 +29,8 @@ class ZipatoConnection:
         Set status of a sensor.
 
         :param str ep: Target ep.
-        :param str ep: Target apikey.
-        :param bool ep: Status value to set the sensor to.
+        :param str apikey: Target apikey.
+        :param bool status: Status value to set the sensor to.
         :rtype: int
         :returns: Status of the HTTP request to the Zipato cloud.
 

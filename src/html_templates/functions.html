@@ -1,0 +1,52 @@
+<h3>Available functions</h3>
+
+<script type="text/javascript">
+        $(document).ready(function() {
+           $("#restart_ping").click(function() {
+               $.ajax({
+                  type: "POST",
+                  url: "{{ restart_ping_path }}"
+               });
+           });
+        });
+    </script>
+
+<div class="well">
+    <h4>Ping status service</h4>
+    To be able to use the ping status service, the desired hosts must first be
+    added in <em>settings</em>. When all hosts have been added to settings,
+    press the <em>Restart ping service</em> button below. This will update the
+    ping service with the new hosts and report the ping status back to the
+    Zipato cloud service.
+    <button id='restart_ping' class="btn btn-info pull-right">
+        <span class="glyphicon glyphicon-refresh"></span>Restart ping service
+    </button>
+</div>
+
+<div class="well">
+    <h4>
+        <a href="{{ poweron_path }}" target="_blank">Power on API command</a>
+    </h4>
+    The poweron command will attempt to start a host by sending it a wake on
+    LAN packet.<br><br>
+    <div class="alert alert-info">
+        <strong>Requires</strong> This command requires <em>wakeonlan</em>
+        to be installed on the server running <em>Zipato extension server
+        </em>.
+    </div>
+</div>
+
+<div class="well">
+    <h4>
+        <a href="{{ poweroff_path }}" target="_blank">Power off API command</a>
+    </h4>
+    To be able to use the poweroff command, the host must first be added in
+    <em>settings</em>.
+    The poweroff command will attempt to shut down a host by logging in to
+    it and running the <code>shutdown -h now</code>.<br><br>
+    <div class="alert alert-info">
+        <strong>Requires</strong> For this to work, a pair of authentication
+        keys will have to be set up between the <em>Zipato extension
+        server</em> and the target host.
+    </div>
+</div>

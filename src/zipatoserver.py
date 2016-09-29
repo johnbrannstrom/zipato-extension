@@ -99,55 +99,6 @@ class ZipatoServer(Settings, Debug):
         message = codecs.decode(stdout + stderr, 'utf-8')
         return self._json_response(message, 200)
 
-    # noinspection PyShadowingNames
-    def _ping(self):
-        """
-        Ping a node and set Zipato status.
-
-        :rtype: str
-        :returns: Status message
-
-        """
-        host = request.args.get('host')
-        if host is None:
-            message = "Error 'ping' must have parameter 'host'!"
-            return self._json_response(message, 400)
-        if host in self.API_PING_HOSTS.keys():
-            ep = self.API_PING_HOSTS[host]['ep']
-            apikey = self.API_PING_HOSTS[host]['apikey']
-        else:
-            message = "Error host '{}' has not been configured for 'ping'!"
-            message = message.format(host)
-            return self._json_response(message, 400)
-        for i in range(self.PING_COUNT):
-            command = "{}ping -c {} {}"
-            command = command.format(self.PING_PATH, str(self.PING_COUNT), host)
-            p = subprocess.Popen(
-                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True)
-            stdout, stderr = p.communicate()
-            result = re.match('.*0 received.*', str(stdout), re.DOTALL)
-            ping_ok = result is None
-            if ping_ok:
-                break
-            sleep(5)
-        serial = self.ZIPATO_SERIAL
-        # Set the status of a Zipato sensor to the ping status
-        command = ("https://my.zipato.com/zipato-web/remoting/attribute/se"
-                   "t?serial={}&ep={}&apiKey={}&state={}")
-        if ping_ok:
-            command = command.format(serial, ep, apikey, 'true')
-        else:
-            command = command.format(serial, ep, apikey, 'false')
-        self.debug_print(10, command, 'zipatoserver', 'ZipatoServer', '_ping')
-        r = requests.get(command)
-        status_code = r.status_code
-        if status_code == 200:
-            message = 'Zipato ping status was updated'
-        else:
-            message = 'Zipato ping status could not be updated'
-        return self._json_response(message, status_code)
-
     # noinspection PyTypeChecker
     def _save_settings(self, settings):
         """
@@ -199,6 +150,30 @@ class ZipatoServer(Settings, Debug):
         message = message.format(param, value)
         return self._json_response(message, 200)
 
+    def _restart_ping(self, param, value):
+        """
+        Create a new crontab with ping commands
+
+        :rtype: str
+        :returns: Status message
+
+        """
+        ping_commands = []
+        ping_command = '{} {}ping --host {} >> {} 2>&1'
+        for host in self.PING_HOSTS:
+            ping_command = ping_command.format(
+                self.PING_SCHEDULE, self.PING_PATH, host, self.ERROR_LOG)
+            ping_commands.append(ping_command)
+        cron_lines = '\n'.join(ping_commands)
+        cron_command = '(echo "{}") | crontab -'.format(cron_lines)
+        p = subprocess.Popen(
+            cron_command, stdout=subprocess.PIPE, shell=True)
+        stdout, stderr = p.communicate()
+        # TODO
+
+        message = "New crontab created"
+        return self._json_response(message, 200)
+
     def handle_request(self):
         """Web server function."""
         host = request.args.get('host')
@@ -214,7 +189,7 @@ class ZipatoServer(Settings, Debug):
                     active_tab = tab
                 result = render_template(
                     'index.html', settings=settings, active_tab=active_tab,
-                    ping_path=Settings.WEB_API_PATH + 'ping',
+                    restart_ping_path=Settings.WEB_API_PATH + 'restart_ping',
                     poweron_path=Settings.WEB_API_PATH + 'poweron',
                     poweroff_path=Settings.WEB_API_PATH + 'poweroff')
             elif request.path == self.WEB_API_PATH + 'poweron':
@@ -225,10 +200,9 @@ class ZipatoServer(Settings, Debug):
                 message = 'poweroff: host={}'
                 message = message.format(str(host))
                 result = self._poweroff()
-            elif request.path == self.WEB_API_PATH + 'ping':
-                message = 'ping: host={}'
-                message = message.format(str(host))
-                result = self._ping()
+            elif request.path == self.WEB_API_PATH + 'restart_ping':
+                message = 'restart_ping'
+                result = self._restart_ping()
             elif request.path == self.WEB_API_PATH + 'save_settings':
                 message = 'save_settings'
                 result = self._save_settings(response_json)
@@ -313,6 +287,7 @@ zipatoserver = Flask(__name__,
 @zipatoserver.route(Settings.WEB_API_PATH + 'poweron')
 @zipatoserver.route(Settings.WEB_API_PATH + 'poweroff')
 @zipatoserver.route(Settings.WEB_API_PATH + 'save_settings', methods=['POST'])
+@zipatoserver.route(Settings.WEB_API_PATH + 'restart_ping', methods=['POST'])
 @zipatoserver.route(Settings.WEB_API_PATH + 'delete_param_value',
                     methods=['DELETE'])
 @zipatoserver.route(Settings.WEB_API_PATH + 'add_param_value', methods=['PUT'])

@@ -27,8 +27,8 @@
                 <li  class="{% if active_tab == 'settings' %}active{% endif %}">
                     <a data-toggle="tab" href="#settings">Settings</a>
                 </li>
-                <li class="{% if active_tab == 'api' %}active{% endif %}">
-                    <a data-toggle="tab" href="#api">API</a>
+                <li class="{% if active_tab == 'functions' %}active{% endif %}">
+                    <a data-toggle="tab" href="#functions">Functions</a>
                 </li>
             </ul>
             <br>
@@ -48,11 +48,9 @@
                      class="tab-pane fade {% if active_tab == 'settings' %}in active{% endif %}">
                     {{ settings | safe }}
                 </div>
-                <div id="api"
-                     class="tab-pane fade {% if active_tab == 'api' %}in active{% endif %}">
-                    {% with ping_path=ping_path %}
-                        {% include 'api.html' %}
-                    {% endwith %}
+                <div id="functions"
+                     class="tab-pane fade {% if active_tab == 'functions' %}in active{% endif %}">
+                    {% include 'functions.html' %}
                 </div>
             </div>
         </div>
