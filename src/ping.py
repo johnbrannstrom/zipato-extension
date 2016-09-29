@@ -43,7 +43,6 @@ class Main(Settings):
         else:
             zipato_connection.set_sensor_status(ep=ep, apikey=apikey, status='false')
         self.debug_print(10, command, 'zipatoserver', 'ZipatoServer', '_ping')
-        r = requests.get(command)
         zipato_connection.set_sensor_status(ep=ep, apikey=apikey, status)
         message = 'ping host={}, status={}'.format(host, status)
       
