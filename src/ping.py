@@ -52,6 +52,22 @@ class Main(Settings):
             message = 'Zipato ping status could not be updated'
         return self._json_response(message, status_code)
       
+      
+      except:
+            error_log = LogFile(self.ERROR_LOG)
+            error_log.write(message)
+            traceback_message = traceback.format_exc()
+            error_log.write(traceback_message, date_time=False)
+            error_log.close()
+            if self.DEBUG > 0:
+                return self._json_response(traceback_message, 500)
+            return self._json_response('Internal system error!', 500)
+        message_log = LogFile(self.MESSAGE_LOG)
+        message_log.write(message)
+        message_log.close()
+        return result
+      
+      
     def run(self):
         """Run the script"""
         args = self._parse_command_line_options()
