@@ -286,7 +286,10 @@ class Main(Settings):
         return args
 
     def run(self):
-        """Run the script"""
+        """
+        Run the script
+        
+        """
         args = self._parse_command_line_options()
         Settings.DEBUG = args.debug
         flask_debug = False
