@@ -312,7 +312,6 @@ zipatoserver = Flask(__name__,
 @zipatoserver.route(Settings.WEB_GUI_PATH)
 @zipatoserver.route(Settings.WEB_API_PATH + 'poweron')
 @zipatoserver.route(Settings.WEB_API_PATH + 'poweroff')
-@zipatoserver.route(Settings.WEB_API_PATH + 'ping')
 @zipatoserver.route(Settings.WEB_API_PATH + 'save_settings', methods=['POST'])
 @zipatoserver.route(Settings.WEB_API_PATH + 'delete_param_value',
                     methods=['DELETE'])
