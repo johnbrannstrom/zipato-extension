@@ -17,7 +17,7 @@ import time
 class LogFile:
     """Log file container."""
 
-    def __init__(self, file_name, verbosity):
+    def __init__(self, file_name, verbosity=0):
         """
         Initializes a LogFile instance.
 
