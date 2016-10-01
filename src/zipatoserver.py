@@ -232,16 +232,14 @@ class ZipatoServer(Settings, Debug):
                 result = self._add_param_value(param, value)
         except:
             error_log = LogFile(self.ERROR_LOG)
-            error_log.write(message)
+            error_log.write([message])
             traceback_message = traceback.format_exc()
-            error_log.write(traceback_message, date_time=False)
-            error_log.close()
+            error_log.write([traceback_message], date_time=False)
             if self.DEBUG > 0:
                 return self._json_response(traceback_message, 500)
             return self._json_response('Internal system error!', 500)
         message_log = LogFile(self.MESSAGE_LOG)
-        message_log.write(message)
-        message_log.close()
+        message_log.write([message])
         return result
 
 
