@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import subprocess
-import requests
-import re
 import argparse
 import traceback
 import json
@@ -16,6 +14,7 @@ from flask import Response
 from settings import Settings
 from logfile import LogFile
 from debug import Debug
+from error import ZipatoError
 
 
 class ZipatoServer(Settings, Debug):
@@ -150,7 +149,7 @@ class ZipatoServer(Settings, Debug):
         message = message.format(param, value)
         return self._json_response(message, 200)
 
-    def _restart_ping(self, param, value):
+    def _restart_ping(self):
         """
         Create a new crontab with ping commands
 
@@ -169,9 +168,10 @@ class ZipatoServer(Settings, Debug):
         p = subprocess.Popen(
             cron_command, stdout=subprocess.PIPE, shell=True)
         stdout, stderr = p.communicate()
-        # TODO
-
-        message = "New crontab created"
+        if stderr != '':
+            message = 'Error updating crontab\n{}\n{}'.format(stdout, stderr)
+            raise ZipatoError(message)
+        message = 'Crontab updated'
         return self._json_response(message, 200)
 
     def handle_request(self):
