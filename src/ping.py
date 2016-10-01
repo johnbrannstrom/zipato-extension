@@ -36,9 +36,9 @@ class Main(Settings):
 
         """
         message_log = LogFile(self.MESSAGE_LOG)
-        if host in self.API_PING_HOSTS.keys():
-            ep = self.API_PING_HOSTS[host]['ep']
-            apikey = self.API_PING_HOSTS[host]['apikey']
+        if host in self.PING_HOSTS.keys():
+            ep = self.PING_HOSTS[host]['ep']
+            apikey = self.PING_HOSTS[host]['apikey']
         else:
             message = (
                 "ping: host={}, Host has not been configured for ping")

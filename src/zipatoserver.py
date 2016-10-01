@@ -6,6 +6,7 @@ import argparse
 import traceback
 import json
 import codecs
+from copy import copy
 from time import sleep
 from flask import Flask
 from flask import request
@@ -158,18 +159,22 @@ class ZipatoServer(Settings, Debug):
 
         """
         ping_commands = []
-        ping_command = '{} {}ping --host {} >> {} 2>&1'
         for host in self.PING_HOSTS:
-            ping_command = ping_command.format(
-                self.PING_SCHEDULE, self.PING_PATH, host, self.ERROR_LOG)
-            ping_commands.append(ping_command)
+            ping_command = '{} /usr/bin/python3 {}ping.py --host {} >> {} 2>&1'
+            ping_command = ping_command.format(self.PING_SCHEDULE,
+                                               self.PROGRAM_PATH,
+                                               copy(host),
+                                               self.ERROR_LOG)
+            ping_commands.append(copy(ping_command))
         cron_lines = '\n'.join(ping_commands)
         cron_command = '(echo "{}") | crontab -'.format(cron_lines)
         p = subprocess.Popen(
             cron_command, stdout=subprocess.PIPE, shell=True)
         stdout, stderr = p.communicate()
-        if stderr != '':
-            message = 'Error updating crontab\n{}\n{}'.format(stdout, stderr)
+        if stderr is not None:
+            message = (
+                'Error updating crontab!\nStandard in:\n{}\nStandard out:\n{}')
+            message = message.format(str(stdout), str(stderr))
             raise ZipatoError(message)
         message = 'Crontab updated'
         return self._json_response(message, 200)
