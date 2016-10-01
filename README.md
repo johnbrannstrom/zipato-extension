@@ -13,7 +13,7 @@ Environment requirements
 * Tested with *Ubuntu Linux 14.04.3 LTS*.
 
 Installation instructions
--------------------------
+--------------------------
 
 1. Create the */usr/local/bin/zipatoserver* directory on the Linux server where you want to run zipato-extension.
 2. Copy all files from the *src* folder in the master branch to the */usr/local/bin/zipatoserver* directory.
