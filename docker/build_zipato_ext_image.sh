@@ -1,5 +1,5 @@
 #!/bin/sh
-RUN git clone https://github.com/johnbrannstrom/zipato-extension -b master \
---single-branch /tmp/zipato-extension
+git clone https://github.com/johnbrannstrom/zipato-extension -b master \
+--single-branch zipato-extension
 docker build . --no-cache -t zipato-extension
-RUN rm -Rf /tmp/zipato-extension
+rm -Rf zipato-extension
