@@ -17,8 +17,6 @@ from logfile import LogFile
 from debug import Debug
 from error import ZipatoError
 
-SETTINGS_PATH = '/mnt/host/etc/'
-
 
 class ZipatoServer(Settings, Debug):
     """Zipato extension web server."""
@@ -112,8 +110,8 @@ class ZipatoServer(Settings, Debug):
 
         """
         self.write_settings_to_file(
-            settings, settings_path=SETTINGS_PATH)
-        Settings.load_settings_from_yaml(settings_path=SETTINGS_PATH)
+            settings, settings_path=self.SETTINGS_PATH)
+        Settings.load_settings_from_yaml(settings_path=self.SETTINGS_PATH)
         message = 'Settings written to file'
         return self._json_response(message, 200)
 
@@ -128,8 +126,8 @@ class ZipatoServer(Settings, Debug):
 
         """
         status = self.delete_param_value_from_file(
-            param, value, settings_path=SETTINGS_PATH)
-        Settings.load_settings_from_yaml(settings_path=SETTINGS_PATH)
+            param, value, settings_path=self.SETTINGS_PATH)
+        Settings.load_settings_from_yaml(settings_path=self.SETTINGS_PATH)
         if status:
             message = "Value '{}' deleted from parameter '{}'"
         else:
@@ -148,8 +146,8 @@ class ZipatoServer(Settings, Debug):
 
         """
         self.add_param_value_to_file(
-            param, value, settings_path=SETTINGS_PATH)
-        Settings.load_settings_from_yaml(settings_path=SETTINGS_PATH)
+            param, value, settings_path=self.SETTINGS_PATH)
+        Settings.load_settings_from_yaml(settings_path=self.SETTINGS_PATH)
         message = "Value '{}' added to parameter '{}'"
         message = message.format(param, value)
         return self._json_response(message, 200)
@@ -193,7 +191,7 @@ class ZipatoServer(Settings, Debug):
             message = request.path
             if request.path == self.WEB_GUI_PATH:
                 settings = self.render_settings_html(
-                    settings_path=SETTINGS_PATH)
+                    settings_path=self.SETTINGS_PATH)
                 active_tab = 'about'
                 if tab is not None:
                     active_tab = tab
@@ -284,7 +282,7 @@ class Main(Settings):
             processes=self.PROCESSES)
 
 
-Settings.load_settings_from_yaml(settings_path=SETTINGS_PATH)
+Settings.load_settings_from_yaml(settings_path=Settings.SETTINGS_PATH)
 zipatoserver = Flask(__name__,
                      static_url_path="",
                      static_folder='html_static',

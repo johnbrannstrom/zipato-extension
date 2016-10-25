@@ -18,6 +18,9 @@ from flask import render_template
 class Settings:
     """Settings container."""
 
+    SETTINGS_PATH = '/mnt/host/etc/'
+    """(*str*) Config file path."""
+
     __CONFIG_FILE = 'zipatoserver.conf'
     """(*str*) Config file name."""
 
