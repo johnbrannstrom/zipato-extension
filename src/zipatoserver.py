@@ -40,6 +40,7 @@ class ZipatoServer(Settings, Debug):
         return Response(
             json_message, status=status_code, mimetype='application/json')
 
+    # noinspection PyGlobalUndefined
     def _poweron(self):
         """
         Start remote node with a wake on LAN packet.
