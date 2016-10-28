@@ -1,12 +1,17 @@
-# Buildfile for Ziato-extension docker container
+# Dockefile for Zipato-extension con
 FROM ubuntu:16.04
-# Install required packages
-RUN apt-get update
-RUN apt-get -y install python3-pip
-RUN DEBIAN_FRONTEND=noninteractive apt-get -y install mysql-server
-RUN pip3 install --upgrade pip
-RUN pip3 install pyyaml flask
-# Prepare environment for zipato-extension an copy program to container
+# Install temporary packages
+RUN apt-get update && \
+    apt-get -y install python3-pip --no-install-recommends && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install \
+    mysql-server && \
+    pip3 install --upgrade pip && \
+    pip3 install setuptools && \
+    pip3 install pyyaml flask && \
+    apt-get remove -y python-pip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# Prepare environment for zipato-extension an copy program to image
 RUN mkdir -p /mnt/host/var/log
 RUN mkdir -p /mnt/host/etc
 COPY zipato-extension/src /usr/local/bin/zipatoserver
