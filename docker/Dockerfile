@@ -17,3 +17,4 @@ RUN mkdir -p /mnt/host/etc
 COPY zipato-extension/src /usr/local/bin/zipatoserver
 RUN chmod +x /usr/local/bin/zipatoserver/zipatoserver.py
 RUN chmod +x /usr/local/bin/zipatoserver/ping.py
+EXPOSE 80
