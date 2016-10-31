@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Parse command line options
 BRANCH="master"
@@ -18,6 +18,14 @@ do
         ;;
         --no-cache)
         NO_CACHE=true
+        ;;
+        -h|--help)
+        echo "build_zipato_extension_image"
+        echo "-b --branch: Git branch."
+        echo "-t --tag: Docker image name."
+        echo "--nocache: Don't use cache when building image."
+        echo "-h --help: Display this help."
+        exit 0
         ;;
         *)
         # unknown option
