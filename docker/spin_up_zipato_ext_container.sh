@@ -41,7 +41,8 @@ done
 docker stop "$NAME"
 docker rm "$NAME"
 # Create new container
-docker create -ti --name "$NAME" -p "$PORT" \
+docker create -ti --name ${NAME} -p ${PORT} \
 -v /var/log:/mnt/host/var/log \
--v /etc:/mnt/host/etc "$IMAGE":latest /bin/bash
-docker start zipato-extension
+-v /etc:/mnt/host/etc ${IMAGE}:latest
+docker start ${IMAGE}
+docker exec -it ${IMAGE} /usr/local/bin/zipatoserver/zipatoserver.py
