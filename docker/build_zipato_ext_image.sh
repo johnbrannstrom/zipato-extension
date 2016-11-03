@@ -16,15 +16,16 @@ do
         TAG="$2"
         shift # past argument
         ;;
-        --no-cache)
+        -n|--no-cache)
         NO_CACHE=true
         ;;
         -h|--help)
-        echo "build_zipato_extension_image"
-        echo "-b --branch: Git branch."
-        echo "-t --tag: Docker image name."
-        echo "--nocache: Don't use cache when building image."
-        echo "-h --help: Display this help."
+        echo "Usage: build_zipato_extension_image [-b] [-t] [-n] [-h]"
+        echo -e "\nOptional arguments:"
+        echo "-b --branch: Git branch. Default value is 'master'."
+        echo "-t --tag:    Docker image name. Default value is 'zipato-extension'."
+        echo "--nocache:   Don't use cache when building image."
+        echo "-h --help:   Display this help."
         exit 0
         ;;
         *)
