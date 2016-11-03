@@ -2,7 +2,7 @@
 
 # Parse command line options
 BRANCH="master"
-NO_CACHE=false
+NO_CACHE=""
 TAG="zipato-extension"
 while [[ $# -gt 0 ]]
 do
@@ -17,15 +17,14 @@ do
         shift # past argument
         ;;
         -n|--no-cache)
-        NO_CACHE=true
+        NO_CACHE="--no-cache"
         ;;
         -h|--help)
-        echo "Usage: build_zipato_extension_image [-b] [-t] [-n] [-h]"
-        echo -e "\nOptional arguments:"
-        echo "-b --branch: Git branch. Default value is 'master'."
-        echo "-t --tag:    Docker image name. Default value is 'zipato-extension'."
-        echo "--nocache:   Don't use cache when building image."
-        echo "-h --help:   Display this help."
+        echo "build_zipato_extension_image"
+        echo "-b --branch: Git branch."
+        echo "-t --tag: Docker image name."
+        echo "--nocache: Don't use cache when building image."
+        echo "-h --help: Display this help."
         exit 0
         ;;
         *)
@@ -37,10 +36,7 @@ done
 
 # Build image
 git clone https://github.com/johnbrannstrom/zipato-extension -b "$BRANCH" \
---single-branch zipato-extension
-if [ "$NO_CACHE" = true ]; then
-    docker build . -t "$TAG" --no-cache
-else
-    docker build . -t "$TAG"
+    --single-branch zipato-extension
+docker build . -t ${TAG} ${NO_CACHE}
 fi
 rm -Rf zipato-extension
