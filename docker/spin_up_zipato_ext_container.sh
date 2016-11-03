@@ -27,6 +27,7 @@ do
         echo "-p --port:  Expose inside port to outside. Format is outside:inside"
         echo "            Default value: 80:80"
         echo "-h --help:  Display this help."
+        echo ""
         exit 0
         ;;
         *)

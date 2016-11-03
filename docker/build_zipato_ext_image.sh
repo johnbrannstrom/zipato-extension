@@ -20,11 +20,14 @@ do
         NO_CACHE="--no-cache"
         ;;
         -h|--help)
-        echo "build_zipato_extension_image"
-        echo "-b --branch: Git branch."
-        echo "-t --tag: Docker image name."
-        echo "--nocache: Don't use cache when building image."
-        echo "-h --help: Display this help."
+        echo "Usage: build_zipato_extension_image.sh [-b] [-t] [-n] [-h]"
+        echo -e "\nOptional arguments:"
+        echo "-b --branch:  Git branch. Default is 'zipato-extension'."
+        echo "-t --tag:     Docker image name. Default is 'zipato-extension'."
+        echo "-n --nocache: Don't use cache when building image. Default is to\
+ use cache."
+        echo "-h --help:    Display this help."
+        echo ""
         exit 0
         ;;
         *)
@@ -35,8 +38,7 @@ do
 done
 
 # Build image
-git clone https://github.com/johnbrannstrom/zipato-extension -b "$BRANCH" \
+git clone https://github.com/johnbrannstrom/zipato-extension -b ${BRANCH} \
     --single-branch zipato-extension
 docker build . -t ${TAG} ${NO_CACHE}
-fi
 rm -Rf zipato-extension
