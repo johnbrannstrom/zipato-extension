@@ -18,4 +18,4 @@ COPY zipato-extension/src /usr/local/bin/zipatoserver
 RUN chmod +x /usr/local/bin/zipatoserver/zipatoserver.py
 RUN chmod +x /usr/local/bin/zipatoserver/ping.py
 EXPOSE 80
-CMD ["/bin/bash"]
+CMD ["/usr/local/bin/zipatoserver/zipatoserver.py"]
