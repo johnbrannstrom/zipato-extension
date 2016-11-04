@@ -1,5 +1,6 @@
 # Dockefile for Zipato-extension con
 FROM ubuntu:16.04
+
 # Install temporary packages
 RUN apt-get update && \
     apt-get -y install python3-pip cron --no-install-recommends && \
@@ -7,10 +8,20 @@ RUN apt-get update && \
     mysql-server && \
     pip3 install --upgrade pip && \
     pip3 install setuptools && \
-    pip3 install pyyaml flask && \
+    pip3 install pyyaml flask requests && \
     apt-get remove -y python-pip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Timezone
+RUN echo "Europe/Stockholm" > /etc/timezone
+
+# Terminal
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
 # Prepare environment for zipato-extension an copy program to image
 RUN mkdir -p /mnt/host/var/log
 RUN mkdir -p /mnt/host/etc
