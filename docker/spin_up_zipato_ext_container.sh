@@ -45,4 +45,3 @@ docker create -ti --name ${NAME} -p ${PORT} \
 -v /var/log:/mnt/host/var/log \
 -v /etc:/mnt/host/etc ${IMAGE}:latest
 docker start ${IMAGE}
-docker exec -it ${IMAGE} /usr/local/bin/zipatoserver/zipatoserver.py
