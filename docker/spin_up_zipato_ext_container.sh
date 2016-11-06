@@ -7,7 +7,7 @@ while [[ $# -gt 0 ]]
 do
     key="$1"
     case $key in
-        --name)
+        -n|--name)
         NAME="$2"
         shift # past argument
         ;;
@@ -22,9 +22,12 @@ do
         -h|--help)
         echo "Usage: spin_up_zipato_ext_container.sh [-i] [-p] [-h]"
         echo -e "\nOptional arguments:"
+        echo "-n --name:  Container name."
+        echo "            Default value: zipato-extension."
         echo "-i --image: Image name to build container from."
         echo "            Default value: zipato-extension."
-        echo "-p --port:  Expose inside port to outside. Format is outside:inside"
+        echo "-p --port:  Expose inside port to outside. Format is outside:con\
+tainer"
         echo "            Default value: 80:80"
         echo "-h --help:  Display this help."
         echo ""

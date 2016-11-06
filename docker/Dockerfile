@@ -1,7 +1,7 @@
 # Dockefile for Zipato-extension con
 FROM ubuntu:16.04
 
-# Install temporary packages
+# Install packages
 RUN apt-get update && \
     apt-get -y install python3-pip cron wakeonlan --no-install-recommends && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install \
@@ -14,7 +14,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Timezone
-RUN echo "Europe/Stockholm" > /etc/timezone
+RUN  rm /etc/localtime && \
+ln -s /usr/share/zoneinfo/Europe/Stockholm /etc/localtime
 
 # Terminal
 RUN locale-gen en_US.UTF-8
@@ -23,10 +24,16 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # Prepare environment for zipato-extension an copy program to image
-RUN mkdir -p /mnt/host/var/log
-RUN mkdir -p /mnt/host/etc
+RUN mkdir -p /mnt/host/var/log && \
+mkdir -p /mnt/host/etc
 COPY zipato-extension/src /usr/local/bin/zipatoserver
-RUN chmod +x /usr/local/bin/zipatoserver/zipatoserver.py
-RUN chmod +x /usr/local/bin/zipatoserver/ping.py
+RUN chmod +x /usr/local/bin/zipatoserver/zipatoserver.py && \
+chmod +x /usr/local/bin/zipatoserver/ping.py
 EXPOSE 80
-CMD ["/usr/local/bin/zipatoserver/zipatoserver.py"]
+
+# Add programs for autostart
+RUN touch "/tmp/start.sh" && \
+chmod +x "/tmp/start.sh" && \
+echo "cron" >> "/tmp/start.sh" && \
+echo "/usr/local/bin/zipatoserver/zipatoserver.py"  >> "/tmp/start.sh"
+CMD ["/bin/bash", "/tmp/start.sh"]
