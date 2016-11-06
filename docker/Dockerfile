@@ -3,7 +3,7 @@ FROM ubuntu:16.04
 
 # Install temporary packages
 RUN apt-get update && \
-    apt-get -y install python3-pip cron --no-install-recommends && \
+    apt-get -y install python3-pip cron wakeonlan --no-install-recommends && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install \
     mysql-server && \
     pip3 install --upgrade pip && \
