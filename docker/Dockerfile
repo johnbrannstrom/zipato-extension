@@ -14,6 +14,8 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN apt-get install -y net-tools # TODO
+
 # Timezone
 RUN  rm /etc/localtime && \
 ln -s /usr/share/zoneinfo/Europe/Stockholm /etc/localtime

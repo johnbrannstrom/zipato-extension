@@ -44,7 +44,7 @@ done
 docker stop "$NAME"
 docker rm "$NAME"
 # Create new container
-docker create -ti --name ${NAME} -p ${PORT} \
+docker create -ti --name ${NAME} -p ${PORT} --net=host \
 -v /var/log:/mnt/host/var/log \
 -v /etc:/mnt/host/etc ${IMAGE}:latest
 docker start ${IMAGE}
