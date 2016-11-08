@@ -46,5 +46,6 @@ done
 # Build image
 git clone https://github.com/johnbrannstrom/zipato-extension -b ${BRANCH} \
     --single-branch zipato-extension
-docker build . -t ${TAG} ${NO_CACHE} --build-arg PORT=${PORT}
+docker build . -t ${TAG} ${NO_CACHE} \
+--build-arg PORT=${PORT}
 rm -Rf zipato-extension
