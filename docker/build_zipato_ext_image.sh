@@ -17,6 +17,10 @@ do
         TAG="$2"
         shift # past argument
         ;;
+        -p|--port)
+        PORT="$2"
+        shift # past argument
+        ;;
         -n|--no-cache)
         NO_CACHE="--no-cache"
         ;;
@@ -27,7 +31,7 @@ do
         echo "-t --tag:     Docker image name. Default is 'zipato-extension'."
         echo "-n --nocache: Don't use cache when building image. Default is to\
  use cache."
-        echo "-p --port:  Expose port to outside. Default value: 80"
+        echo "-p --port:    Expose port to outside. Default value: 80"
         echo "-h --help:    Display this help."
         echo ""
         exit 0
