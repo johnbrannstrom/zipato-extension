@@ -1,6 +1,8 @@
 # Dockefile for Zipato-extension con
 FROM ubuntu:16.04
 
+ARG PORT
+
 # Install packages
 RUN apt-get update && \
     apt-get -y install python3-pip cron wakeonlan ssh-client iputils-ping \
@@ -14,11 +16,10 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN apt-get install -y net-tools # TODO
-
-# Timezone
+# Set timezone and prompt
 RUN  rm /etc/localtime && \
-ln -s /usr/share/zoneinfo/Europe/Stockholm /etc/localtime
+ln -s /usr/share/zoneinfo/Europe/Stockholm /etc/localtime && \
+echo 'export PS1="\u@zipato-extension"' >> /root/.bashrc
 
 # Terminal
 RUN locale-gen en_US.UTF-8
@@ -32,15 +33,10 @@ mkdir -p /mnt/host/etc
 COPY zipato-extension/src /usr/local/bin/zipatoserver
 RUN chmod +x /usr/local/bin/zipatoserver/zipatoserver.py && \
 chmod +x /usr/local/bin/zipatoserver/ping.py
-EXPOSE 80
-
-# TODO test
-#RUN mkdir -p /home/john/.ssh
-#COPY /home/john/.ssh/id_rsa /home/john/.ssh/id_rsa
 
 # Add programs for autostart
 RUN touch "/tmp/start.sh" && \
 chmod +x "/tmp/start.sh" && \
 echo "cron" >> "/tmp/start.sh" && \
-echo "/usr/local/bin/zipatoserver/zipatoserver.py"  >> "/tmp/start.sh"
+echo "/usr/local/bin/zipatoserver/zipatoserver.py -p ${PORT}"  >> "/tmp/start.sh"
 CMD ["/bin/bash", "/tmp/start.sh"]

@@ -259,10 +259,13 @@ class Main(Settings):
 
         """
         debug_help = 'Debugging printout level.'
+        port_help = 'Port the web server runs on.'
         description = 'Start Zipato extension web server.'
         parser = argparse.ArgumentParser(description=description)
         parser.add_argument('--debug', type=int, default=0,
                             help=debug_help, required=False)
+        parser.add_argument('-p', '--port', type=int,
+                            help=port_help, required=False)
         args = parser.parse_args()
         return args
 
@@ -273,6 +276,8 @@ class Main(Settings):
         """
         args = self._parse_command_line_options()
         Settings.DEBUG = args.debug
+        if args.port is not None:
+            Settings.TCP_PORT = args.port
         flask_debug = False
         if args.debug > 0:
             flask_debug = True

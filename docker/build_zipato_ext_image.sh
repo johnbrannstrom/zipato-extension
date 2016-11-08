@@ -4,6 +4,7 @@
 BRANCH="master"
 NO_CACHE=""
 TAG="zipato-extension"
+PORT="80"
 while [[ $# -gt 0 ]]
 do
     key="$1"
@@ -26,6 +27,7 @@ do
         echo "-t --tag:     Docker image name. Default is 'zipato-extension'."
         echo "-n --nocache: Don't use cache when building image. Default is to\
  use cache."
+        echo "-p --port:  Expose port to outside. Default value: 80"
         echo "-h --help:    Display this help."
         echo ""
         exit 0
@@ -40,5 +42,5 @@ done
 # Build image
 git clone https://github.com/johnbrannstrom/zipato-extension -b ${BRANCH} \
     --single-branch zipato-extension
-docker build . -t ${TAG} ${NO_CACHE}
+docker build . -t ${TAG} ${NO_CACHE} --build-arg PORT=${PORT}
 rm -Rf zipato-extension

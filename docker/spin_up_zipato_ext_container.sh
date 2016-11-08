@@ -2,7 +2,7 @@
 # Parse command line options
 NAME="zipato-extension"
 IMAGE="zipato-extension"
-PORT="80:80"
+PORT="80"
 while [[ $# -gt 0 ]]
 do
     key="$1"
@@ -26,9 +26,7 @@ do
         echo "            Default value: zipato-extension."
         echo "-i --image: Image name to build container from."
         echo "            Default value: zipato-extension."
-        echo "-p --port:  Expose inside port to outside. Format is outside:con\
-tainer"
-        echo "            Default value: 80:80"
+        echo "-p --port:  Expose port to outside. Default value: 80"
         echo "-h --help:  Display this help."
         echo ""
         exit 0
@@ -44,7 +42,7 @@ done
 docker stop "$NAME"
 docker rm "$NAME"
 # Create new container
-docker create -ti --name ${NAME} -p ${PORT} --net=host \
+docker create -ti --name ${NAME} -p ${PORT}:${PORT} --net=host \
 -v /var/log:/mnt/host/var/log \
 -v /etc:/mnt/host/etc ${IMAGE}:latest
 docker start ${IMAGE}
