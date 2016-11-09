@@ -19,7 +19,7 @@ RUN apt-get update && \
 # Set timezone and prompt
 RUN  rm /etc/localtime && \
 ln -s /usr/share/zoneinfo/Europe/Stockholm /etc/localtime && \
-echo 'export PS1="\u@zipato-extension# "' >> /root/.bashrc
+echo "export PS1=\"\u@zipato-extension# \"" >> /root/.bashrc
 
 # Terminal
 RUN locale-gen en_US.UTF-8
