@@ -5,7 +5,6 @@ BRANCH="master"
 NO_CACHE=""
 TAG="zipato-extension"
 PORT="80"
-DOCKERFILE="Dockerfile_master"
 while [[ $# -gt 0 ]]
 do
     key="$1"
@@ -45,8 +44,9 @@ do
 done
 
 # Select dockerfile
-if [ "$DOCKERFILE" != "Dockerfile_master" ]; then
-    DOCKERFILE = "Dockerfile_other"
+DOCKERFILE="Dockerfile_master"
+if [ "$BRANCH" != "master" ]; then
+    DOCKERFILE="Dockerfile_other"
 fi
 
 # Build image
