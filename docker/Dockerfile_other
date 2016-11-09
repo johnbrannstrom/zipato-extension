@@ -1,7 +1,8 @@
-# Dockefile for Zipato-extension con
+# Dockefile for Zipato-extension branched other than master
 FROM ubuntu:16.04
 
 ARG PORT
+ARG TAG
 
 # Install packages
 RUN apt-get update && \
@@ -16,7 +17,7 @@ RUN apt-get update && \
 # Set timezone and prompt
 RUN  rm /etc/localtime && \
 ln -s /usr/share/zoneinfo/Europe/Stockholm /etc/localtime && \
-echo "export PS1=\"\u@zipato-extension# \"" >> /root/.bashrc
+echo "export PS1=\"\u@${TAG}# \"" >> /root/.bashrc
 
 # Terminal
 RUN locale-gen en_US.UTF-8

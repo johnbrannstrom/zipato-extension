@@ -5,6 +5,7 @@ BRANCH="master"
 NO_CACHE=""
 TAG="zipato-extension"
 PORT="80"
+DOCKERFILE="Dockerfile_master"
 while [[ $# -gt 0 ]]
 do
     key="$1"
@@ -43,9 +44,15 @@ do
     shift # past argument or value
 done
 
+# Select dockerfile
+if [ "$DOCKERFILE" != "Dockerfile_master" ]; then
+    DOCKERFILE = "Dockerfile_other"
+fi
+
 # Build image
 git clone https://github.com/johnbrannstrom/zipato-extension -b ${BRANCH} \
     --single-branch zipato-extension
-docker build . -t ${TAG} ${NO_CACHE} \
---build-arg PORT=${PORT}
+docker build . -t ${TAG} ${NO_CACHE} -f ${DOCKERFILE} \
+--build-arg PORT=${PORT} \
+--build-arg TAG=${TAG}
 rm -Rf zipato-extension
