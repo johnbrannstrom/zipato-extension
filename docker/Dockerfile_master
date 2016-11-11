@@ -39,5 +39,7 @@ chmod +x /usr/local/bin/zipatoserver/ping.py
 RUN touch "/tmp/start.sh" && \
 chmod +x "/tmp/start.sh" && \
 echo "cron" >> "/tmp/start.sh" && \
+echo "curl -X POST http://localhost:${PORT}/api/restart_ping" \
+>> "/tmp/start.sh" && \
 echo "/usr/local/bin/zipatoserver/zipatoserver.py -p ${PORT}"  >> "/tmp/start.sh"
 CMD ["/bin/bash", "/tmp/start.sh"]
