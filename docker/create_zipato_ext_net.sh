@@ -1,8 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 SUBNET="192.168.0.0/24"
 GATEWAY="192.168.0.1"
 INTERFACE="eth0"
+ADDRESS="192.168.0.83"
+NETMASK="255.255.255.0"
 while [[ $# -gt 0 ]]
 do
     key="$1"
@@ -20,7 +22,11 @@ do
         shift # past argument
         ;;
         -n|--netmask)
-        netmask="$2"
+        NETMASK="$2"
+        shift # past argument
+        ;;
+        -b|--broadcast)
+        BROADCAST="$2"
         shift # past argument
         ;;
         -a|--address)
@@ -28,7 +34,7 @@ do
         shift # past argument
         ;;
         -h|--help)
-        echo "Usage: create_zipato_ext_net.sh -s -g -i  -n -a [-h]"
+        echo "Usage: create_zipato_ext_net.sh -i -s -g -n -a -b [-h]"
         echo -e "\nOptional arguments:"
         echo "-s --subnet:     Parent interface subnet."
         echo "                 Default value: ${SUBNET}."
@@ -39,6 +45,8 @@ do
         echo "                 Default value: ${ADDRESS}."
         echo "-g --gateway:    Parent interface default gateway."
         echo "                 Default value: ${GATEWAY}."
+        echo "-b --broadcast:  Parent interface broadcast address."
+        echo "                 Default value: ${BROADCAST}."
         echo "-i --interface:  Parent interface name."
         echo "                 Default value: ${INTERFACE}"
         echo "-h --help:       Display this help."
