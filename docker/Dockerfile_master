@@ -6,7 +6,7 @@ ARG TAG
 
 # Install packages
 RUN apt-get update && \
-    apt-get -y install python3-pip cron wakeonlan ssh-client iputils-ping \
+    apt-get -y install python3-pip cron etherwake ssh-client iputils-ping \
     curl --no-install-recommends && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install \
     mysql-server && \
