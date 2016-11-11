@@ -58,10 +58,10 @@ class ZipatoServer(Settings, Debug):
             return self._json_response(message, 400)
         # Power on node
         if host is not None:
-            command = "{}wakeonlan -i {} {}"
+            command = "{}etherwake -i {} {}"
             command = command.format(self.WAKEONLAN_PATH, host, mac)
         else:
-            command = "{}wakeonlan {}".format(self.WAKEONLAN_PATH, mac)
+            command = "{}etherwake {}".format(self.WAKEONLAN_PATH, mac)
         for i in range(3):
             p = subprocess.Popen(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,

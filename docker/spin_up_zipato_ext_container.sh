@@ -42,7 +42,7 @@ done
 docker stop "$NAME"
 docker rm "$NAME"
 # Create new container
-docker create -ti --name ${NAME} -p ${PORT}:${PORT} --net=zipato_net \
+docker create -ti --name ${NAME} -p ${PORT}:${PORT} --net=host \
  --privileged \
 -v /var/log:/mnt/host/var/log \
 -v /etc:/mnt/host/etc ${IMAGE}:latest
