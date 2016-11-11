@@ -5,6 +5,7 @@ GATEWAY="192.168.0.1"
 INTERFACE="eth0"
 ADDRESS="192.168.0.83"
 NETMASK="255.255.255.0"
+BROADCAST="192.168.0.255"
 while [[ $# -gt 0 ]]
 do
     key="$1"
@@ -37,18 +38,18 @@ do
         echo "Usage: create_zipato_ext_net.sh -i -s -g -n -a -b [-h]"
         echo -e "\nOptional arguments:"
         echo "-s --subnet:     Parent interface subnet."
-        echo "                 Default value: ${SUBNET}."
+        echo "                 Default value: '${SUBNET}'."
         echo "-n --netmask:    Parent interface netmask."
-        echo "                 Default value: ${NETMASK}."
-        echo "-a --address:    New IP address on the parent interface for the"
-        echo "                 zipato-extension network."
-        echo "                 Default value: ${ADDRESS}."
+        echo "                 Default value: '${NETMASK}'."
+        echo "-a --address:    IP address on the parent interface subnet, for"
+        echo "                 the new zipato-extension interface."
+        echo "                 Default value: '${ADDRESS}'."
         echo "-g --gateway:    Parent interface default gateway."
-        echo "                 Default value: ${GATEWAY}."
+        echo "                 Default value: '${GATEWAY}'."
         echo "-b --broadcast:  Parent interface broadcast address."
-        echo "                 Default value: ${BROADCAST}."
+        echo "                 Default value: '${BROADCAST}'."
         echo "-i --interface:  Parent interface name."
-        echo "                 Default value: ${INTERFACE}"
+        echo "                 Default value: '${INTERFACE}'"
         echo "-h --help:       Display this help."
         echo ""
         exit 0
@@ -61,11 +62,11 @@ do
 done
 
 # Create virtual interface
-echo >> "iface ${INTERFACE}:839 inet static
+echo "iface ${INTERFACE}:839 inet static
 address ${ADDRESS}
 netmask ${NETMASK}
 broadcast ${BROADCAST}" >> /etc/network/interfaces
-# service netwok restart TODO uncomment
+# service networking restart TODO uncomment
 
 # Create docker network
 docker network create -d macvlan --subnet=${SUBNET} \
