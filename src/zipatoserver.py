@@ -90,8 +90,7 @@ class ZipatoServer(Settings, Debug):
             message = message.format(host)
             return self._json_response(message, 400)
         # Power off node
-        command = ("{}ssh -o 'StrictHostKeyChecking no' -i {} -T {}@{} 'shutdo"
-                   "wn -h now'")
+        command = ("{}ssh -i {} -T {}@{} 'shutdown -h now'")
         ssh_key_file = self.API_POWEROFF_HOSTS[host]['ssh_key_file']
         command = command.format(self.SSH_PATH, ssh_key_file, user, host)
         p = subprocess.Popen(
