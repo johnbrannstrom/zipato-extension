@@ -4,6 +4,9 @@ FROM ubuntu:16.04
 ARG PORT
 ARG TAG
 
+# This needed to overcome a Ubuntu SSH bug
+RUN mkdir /var/run/sshd && chmod 0755 /var/run/sshd
+
 # Install packages
 RUN apt-get update && \
     apt-get -y install python3-pip cron etherwake ssh-client iputils-ping \
@@ -25,6 +28,9 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+# Set password and add user test
+RUN useradd test && echo 'test:test' | chpasswd
+
 # Prepare environment for zipato-extension and copy program to image
 RUN mkdir -p /mnt/host/var/log && \
 mkdir -p /mnt/host/etc
@@ -36,5 +42,6 @@ chmod +x /usr/local/bin/zipatoserver/ping.py
 RUN touch "/tmp/start.sh" && \
 chmod +x "/tmp/start.sh" && \
 echo "cron" >> "/tmp/start.sh" && \
+echo "/usr/sbin/sshd -p 23" >> "/tmp/start.sh" && \
 echo "/usr/local/bin/zipatoserver/zipatoserver.py -p ${PORT}"  >> "/tmp/start.sh"
 CMD ["/bin/bash", "/tmp/start.sh"]
