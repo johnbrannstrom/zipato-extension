@@ -28,8 +28,10 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Set password and add user test
-RUN useradd test && echo 'test:test' | chpasswd
+# Allow root login with SSH and password
+RUN echo 'root:root' | chpasswd && \
+passwd -u root && \
+sed -i 's/\PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 
 # Prepare environment for zipato-extension and copy program to image
 RUN mkdir -p /mnt/host/var/log && \
