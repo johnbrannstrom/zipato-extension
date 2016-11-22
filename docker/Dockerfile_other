@@ -48,8 +48,8 @@ echo "cron" >> "/tmp/start_services.sh" && \
 echo "/usr/sbin/sshd -p 23" >> "/tmp/start_services.sh" && \
 touch "/tmp/start_main.sh" && \
 chmod +x "/tmp/start_main.sh" && \
-echo "#!/bin/bash" >> "/tmp/start_msin.sh" && \
+echo "#!/bin/bash" >> "/tmp/start_main.sh" && \
 echo "/usr/local/bin/zipatoserver/zipatoserver.py -p ${PORT}" \
 >> "/tmp/start_main.sh" && \
 chmod +x "/tmp/start_main.sh"
-CMD ["/bin/bash /tmp/start_services.sh && /bin/bash /bin/bash"]
+CMD ["/bin/bash"]
