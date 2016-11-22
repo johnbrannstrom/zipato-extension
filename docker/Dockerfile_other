@@ -41,9 +41,15 @@ RUN chmod +x /usr/local/bin/zipatoserver/zipatoserver.py && \
 chmod +x /usr/local/bin/zipatoserver/ping.py
 
 # Add programs for autostart
-RUN touch "/tmp/start.sh" && \
-chmod +x "/tmp/start.sh" && \
-echo "cron" >> "/tmp/start.sh" && \
-echo "/usr/sbin/sshd -p 23" >> "/tmp/start.sh" && \
-echo "/usr/local/bin/zipatoserver/zipatoserver.py -p ${PORT}"  >> "/tmp/start.sh"
-CMD ["/bin/bash", "/tmp/start.sh"]
+RUN touch "/tmp/start_services.sh" && \
+chmod +x "/tmp/start_services.sh" && \
+echo "#!/bin/bash" >> "/tmp/start_services.sh" && \
+echo "cron" >> "/tmp/start_services.sh" && \
+echo "/usr/sbin/sshd -p 23" >> "/tmp/start_services.sh" && \
+touch "/tmp/start_main.sh" && \
+chmod +x "/tmp/start_main.sh" && \
+echo "#!/bin/bash" >> "/tmp/start_msin.sh" && \
+echo "/usr/local/bin/zipatoserver/zipatoserver.py -p ${PORT}" \
+>> "/tmp/start_main.sh" && \
+chmod +x "/tmp/start_main.sh"
+CMD ["/bin/bash /tmp/start_services.sh && /bin/bash /bin/bash"]
