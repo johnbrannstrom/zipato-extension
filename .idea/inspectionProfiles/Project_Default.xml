@@ -9,6 +9,8 @@
           <option value="zipatoserver.ZipatoServer.*" />
           <option value="settings.Settings.WEB_API_PATH" />
           <option value="settings.Settings.WEB_GUI_PATH" />
+          <option value="zipatoserver.ZipatoRequestHandler.SSH_KEY_FILE" />
+          <option value="zipatoserver.flask" />
         </list>
       </option>
     </inspection_tool>

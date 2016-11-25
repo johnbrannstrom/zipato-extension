@@ -29,7 +29,7 @@ class Debug:
         Print debug message to screen.
 
         :param int level: Lowest debug level message will be printed in.
-        :param int message: Message to print.
+        :param str message: Message to print.
         :param str module: Module this debug printout is used in.
         :param str class_: Class this debug printout is used in.
         :param str function: Function this debug printout is used in.

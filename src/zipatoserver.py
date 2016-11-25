@@ -18,7 +18,8 @@ from debug import Debug
 from error import ZipatoError
 
 
-class ZipatoServer(Settings, Debug):
+# noinspection PyUnresolvedReferences
+class ZipatoRequestHandler(Settings, Debug):
     """Zipato extension web server."""
 
     @staticmethod
@@ -40,7 +41,7 @@ class ZipatoServer(Settings, Debug):
         return Response(
             json_message, status=status_code, mimetype='application/json')
 
-    # noinspection PyGlobalUndefined
+    # noinspection PyGlobalUndefined,PyUnboundLocalVariable
     def _poweron(self):
         """
         Start remote node with a wake on LAN packet.
@@ -71,6 +72,7 @@ class ZipatoServer(Settings, Debug):
         message = codecs.decode(stdout + stderr, 'utf-8')
         return self._json_response(message, 200)
 
+    # noinspection PyShadowingNames
     def _poweroff(self):
         """
         Log on to remote node and shut it down.
@@ -102,6 +104,19 @@ class ZipatoServer(Settings, Debug):
         message = codecs.decode(stdout + stderr, 'utf-8')
         return self._json_response(message, 200)
 
+    def _populate_ssh_key_files(self):
+        """
+        Read all ssh key file contents from settings and write ssh key file to
+        disk for SSH to use.
+
+        """
+        for host, values in self.API_POWEROFF_HOSTS:
+            file_name = self.SSH_KEY_FILE.format(host)
+            file_obj = open(file_name, 'w')
+            file_obj.writelines(values['ssh_key'])
+            file_obj.close()
+        self.debug_print(2, 'The following ssh key files have been written to disk')
+
     # noinspection PyTypeChecker
     def _save_settings(self, settings):
         """
@@ -115,6 +130,7 @@ class ZipatoServer(Settings, Debug):
         self.write_settings_to_file(
             settings, settings_path=self.SETTINGS_PATH)
         Settings.load_settings_from_yaml(settings_path=self.SETTINGS_PATH)
+        self._populate_ssh_key_files()
         message = 'Settings written to file'
         return self._json_response(message, 200)
 
@@ -155,6 +171,7 @@ class ZipatoServer(Settings, Debug):
         message = message.format(param, value)
         return self._json_response(message, 200)
 
+    # noinspection PyShadowingNames
     def _restart_ping(self):
         """
         Create a new crontab with ping commands
@@ -184,6 +201,7 @@ class ZipatoServer(Settings, Debug):
         message = 'Crontab updated'
         return self._json_response(message, 200)
 
+    # noinspection PyUnboundLocalVariable
     def handle_request(self):
         """Web server function."""
         host = request.args.get('host')
@@ -271,18 +289,6 @@ class Main(Settings):
         args = parser.parse_args()
         return args
 
-    def _populate_ssh_key_files(self):
-        """
-        Read all ssh key file contents from settings and write ssh key file to
-        disk for SSH to use.
-
-        """
-        for host, values in self.API_POWEROFF_HOSTS:
-            ssh_key = values['ssh_key']
-
-
-
-
     def run(self):
         """
         Run the script.
@@ -319,8 +325,8 @@ zipatoserver = Flask(__name__,
 @zipatoserver.route(Settings.WEB_API_PATH + 'add_param_value', methods=['PUT'])
 def index():
     """Handle incoming HTTP requests."""
-    web_server = ZipatoServer()
-    return web_server.handle_request()
+    request_handler = ZipatoRequestHandler()
+    return request_handler.handle_request()
 
 if __name__ == '__main__':
     main = Main()
