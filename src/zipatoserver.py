@@ -271,9 +271,21 @@ class Main(Settings):
         args = parser.parse_args()
         return args
 
+    def _populate_ssh_key_files(self):
+        """
+        Read all ssh key file contents from settings and write ssh key file to
+        disk for SSH to use.
+
+        """
+        for host, values in self.API_POWEROFF_HOSTS:
+            ssh_key = values['ssh_key']
+
+
+
+
     def run(self):
         """
-        Run the script
+        Run the script.
         
         """
         args = self._parse_command_line_options()
