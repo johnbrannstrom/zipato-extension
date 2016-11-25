@@ -110,11 +110,16 @@ class ZipatoRequestHandler(Settings, Debug):
         disk for SSH to use.
 
         """
-        for host, values in self.API_POWEROFF_HOSTS:
-            file_name = self.SSH_KEY_FILE.format(host)
+        for host, values in self.API_POWEROFF_HOSTS.items():
+            file_name = self.SSH_KEY_FILE.replace('$HOST', host)
             file_obj = open(file_name, 'w')
             file_obj.writelines(values['ssh_key'])
             file_obj.close()
+            command = "chmod 0600 {}".format(file_name)
+            p = subprocess.Popen(
+                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True)
+            p.communicate()
         message = "The following ssh key files have been written to disk:\n{}"
         self.debug_print(
             2, message.format(str(self.API_POWEROFF_HOSTS.keys())))
@@ -261,7 +266,8 @@ class ZipatoRequestHandler(Settings, Debug):
             error_log.write([message])
             traceback_message = traceback.format_exc()
             error_log.write([traceback_message], date_time=False)
-            if self.DEBUG > 0:
+            if self.debug > 0:
+                self.debug_print(1, traceback_message)
                 return self._json_response(traceback_message, 500)
             return self._json_response('Internal system error!', 500)
         message_log = LogFile(self.MESSAGE_LOG)
@@ -297,7 +303,7 @@ class Main(Settings):
         
         """
         args = self._parse_command_line_options()
-        Settings.DEBUG = args.debug
+        Settings.debug = args.debug
         if args.port is not None:
             Settings.TCP_PORT = args.port
         flask_debug = False
