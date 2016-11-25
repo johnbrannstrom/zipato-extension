@@ -94,6 +94,7 @@ class ZipatoServer(Settings, Debug):
                    "wn -h now'")
         ssh_key_file = self.SSH_KEY_FILE.replace('$HOST', host)
         command = command.format(self.SSH_PATH, ssh_key_file, user, host)
+        self.debug_print(1, 'Shut down command: {}'.format(command))
         p = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             shell=True)
