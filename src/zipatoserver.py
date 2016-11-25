@@ -115,7 +115,9 @@ class ZipatoRequestHandler(Settings, Debug):
             file_obj = open(file_name, 'w')
             file_obj.writelines(values['ssh_key'])
             file_obj.close()
-        self.debug_print(2, 'The following ssh key files have been written to disk')
+        message = "The following ssh key files have been written to disk:\n{}"
+        self.debug_print(
+            2, message.format(str(self.API_POWEROFF_HOSTS.keys())))
 
     # noinspection PyTypeChecker
     def _save_settings(self, settings):
