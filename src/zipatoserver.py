@@ -105,26 +105,6 @@ class ZipatoRequestHandler(Settings, Debug):
         message = codecs.decode(stdout + stderr, 'utf-8')
         return self._json_response(message, 200)
 
-    def _populate_ssh_key_files(self):
-        """
-        Read all ssh key file contents from settings and write ssh key file to
-        disk for SSH to use.
-
-        """
-        for host, values in self.API_POWEROFF_HOSTS.items():
-            file_name = self.SSH_KEY_FILE.replace('$HOST', host)
-            file_obj = open(file_name, 'w')
-            file_obj.writelines(values['ssh_key'])
-            file_obj.close()
-            command = "chmod 0600 {}".format(file_name)
-            p = subprocess.Popen(
-                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True)
-            p.communicate()
-        message = "The following ssh key files have been written to disk:\n{}"
-        self.debug_print(
-            2, message.format(str(self.API_POWEROFF_HOSTS.keys())))
-
     # noinspection PyTypeChecker
     def _save_settings(self, settings):
         """
@@ -135,10 +115,13 @@ class ZipatoRequestHandler(Settings, Debug):
         :returns: Status message
 
         """
+        # Write settings to file
         self.write_settings_to_file(
             settings, settings_path=self.SETTINGS_PATH)
         Settings.load_settings_from_yaml(settings_path=self.SETTINGS_PATH)
-        self._populate_ssh_key_files()
+        # Write all ssh key files to disk
+        Main.populate_ssh_key_files()
+        # Return status message
         message = 'Settings written to file'
         return self._json_response(message, 200)
 
@@ -299,6 +282,27 @@ class Main(Settings):
         args = parser.parse_args()
         return args
 
+    @staticmethod
+    def populate_ssh_key_files():
+        """
+        Read all ssh key file contents from settings and write ssh key file(s)
+        to disk for SSH to use.
+
+        """
+        for host, values in Settings.API_POWEROFF_HOSTS.items():
+            file_name = Settings.SSH_KEY_FILE.replace('$HOST', host)
+            file_obj = open(file_name, 'w')
+            file_obj.writelines(values['ssh_key'])
+            file_obj.close()
+            command = "chmod 0600 {}".format(file_name)
+            p = subprocess.Popen(
+                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True)
+            p.communicate()
+        message = "The following ssh key files have been written to disk:\n{}"
+        Debug.debug_print(
+            2, message.format(str(Settings.API_POWEROFF_HOSTS.keys())))
+
     def run(self):
         """
         Run the script.
@@ -319,6 +323,7 @@ class Main(Settings):
 
 
 Settings.load_settings_from_yaml(settings_path=Settings.SETTINGS_PATH)
+Main.populate_ssh_key_files()
 zipatoserver = Flask(__name__,
                      static_url_path="",
                      static_folder='html_static',

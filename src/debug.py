@@ -23,8 +23,8 @@ class Debug:
         10: "\033[0;30;43m"}
     """(*dict*) Debug level color."""
 
-    def debug_print(
-            self, level, message, module=None, class_=None, function=None):
+    @staticmethod
+    def debug_print(level, message, module=None, class_=None, function=None):
         """
         Print debug message to screen.
 
@@ -35,8 +35,8 @@ class Debug:
         :param str function: Function this debug printout is used in.
 
         """
-        if self.debug >= level:
-            start = self._LEVEL_COLOR[level]
+        if Debug.debug >= level:
+            start = Debug._LEVEL_COLOR[level]
             end = "\033[0m"
             print()
             print("{}Debug level: {}{}".format(start, level, end))

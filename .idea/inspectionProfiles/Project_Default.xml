@@ -11,6 +11,8 @@
           <option value="settings.Settings.WEB_GUI_PATH" />
           <option value="zipatoserver.ZipatoRequestHandler.SSH_KEY_FILE" />
           <option value="zipatoserver.flask" />
+          <option value="settings.Settings.SSH_KEY_FILE" />
+          <option value="settings.Settings.*" />
         </list>
       </option>
     </inspection_tool>
