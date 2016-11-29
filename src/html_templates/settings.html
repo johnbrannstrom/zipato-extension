@@ -20,7 +20,7 @@ $.fn.formToJSON = function() {
     };
     //loop through all of the input/textarea elements of the form
     //this.find('input, textarea').each(function() {
-    $(this).find('input, textarea').each(function() {
+    $(this).find('input').each(function() {
         //ignore input elements with names that start with a '_'
         if($(this).attr('name').charAt(0) != '_') {
             //split the '_-' notated names into arrays and pass with the value
@@ -142,6 +142,10 @@ $(document).ready(function() {
                     <td colspan="2"></td>
                     <td>{{ sub_constant }}</td>
                     <td>
+                        <!-- TODO decide<input size="35"
+                               type="text"
+                               value="{{ sub_value }}"
+                               name="{{ constant }}_-{{ sub_header }}_-{{ sub_constant }}"/>-->
                         <textarea cols="35"
                                   rows="1"
                                   name="{{ constant }}_-{{ sub_header }}_-{{ sub_constant }}"
@@ -155,6 +159,10 @@ $(document).ready(function() {
             <tr>
                 <td colspan="3">{{ constant }}</td>
                 <td>
+                    <!-- TODO decide<input size="35"
+                           type="text"
+                           value="{{ value }}"
+                           name="{{ constant }}"/>-->
                     <textarea cols="35"
                               rows="1"
                               name="{{ constant }}">{{ value }}</textarea>
