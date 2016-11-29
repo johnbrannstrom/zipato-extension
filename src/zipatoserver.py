@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import subprocess
+import pprint
 import argparse
 import traceback
 import json
@@ -214,7 +215,8 @@ class ZipatoRequestHandler(Settings, Debug):
         host = request.args.get('host')
         mac = request.args.get('mac')
         tab = request.args.get('tab')
-        response_json = request.get_json()
+        request_json = request.get_json()
+        self.debug_print(3, "request_json: " + pprint.pformat(request_json))
         try:
             message = request.path
             if request.path == self.WEB_GUI_PATH:
@@ -241,23 +243,23 @@ class ZipatoRequestHandler(Settings, Debug):
                 result = self._restart_ping()
             elif request.path == self.WEB_API_PATH + 'save_settings':
                 message = 'save_settings'
-                result = self._save_settings(response_json)
+                result = self._save_settings(request_json)
             elif request.path == self.WEB_API_PATH + 'delete_param_value':
                 param = None
                 value = None
-                if 'param' in response_json:
-                    param = response_json['param']
-                if 'value' in response_json:
-                    value = response_json['value']
+                if 'param' in request_json:
+                    param = request_json['param']
+                if 'value' in request_json:
+                    value = request_json['value']
                 message = 'delete_param_value: param={}, value={}'
                 message = message.format(param, value)
                 result = self._delete_param_value(param, value)
             elif request.path == self.WEB_API_PATH + 'add_param_value':
                 param = None
-                if 'param' in response_json:
-                    param = response_json['param']
-                if 'value' in response_json:
-                    value = response_json['value']
+                if 'param' in request_json:
+                    param = request_json['param']
+                if 'value' in request_json:
+                    value = request_json['value']
                 message = 'add_param_value: param={}, value={}'
                 message = message.format(param, value)
                 result = self._add_param_value(param, value)
