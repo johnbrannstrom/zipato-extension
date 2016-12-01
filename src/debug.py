@@ -13,7 +13,7 @@ This module prints debug messages to screen.
 class Debug:
     """Helper class for debug printing. """
 
-    debug = 0
+    DEBUG = 0
     """(*Integer*) Current debug level."""
 
     _LEVEL_COLOR = {
@@ -35,7 +35,7 @@ class Debug:
         :param str function: Function this debug printout is used in.
 
         """
-        if Debug.debug >= level:
+        if Debug.DEBUG >= level:
             start = Debug._LEVEL_COLOR[level]
             end = "\033[0m"
             print()

@@ -20,7 +20,7 @@ from error import ZipatoError
 
 
 # noinspection PyUnresolvedReferences
-class ZipatoRequestHandler(Settings, Debug):
+class ZipatoRequestHandler(Settings):
     """Zipato extension web server."""
 
     @staticmethod
@@ -97,7 +97,7 @@ class ZipatoRequestHandler(Settings, Debug):
                    "wn -h now'")
         ssh_key_file = self.SSH_KEY_FILE.replace('$HOST', host)
         command = command.format(self.SSH_PATH, ssh_key_file, user, host)
-        self.debug_print(1, 'Shut down command: {}'.format(command))
+        Debug.debug_print(1, 'Shut down command: {}'.format(command))
         p = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             shell=True)
@@ -199,7 +199,7 @@ class ZipatoRequestHandler(Settings, Debug):
         mac = request.args.get('mac')
         tab = request.args.get('tab')
         request_json = request.get_json()
-        self.debug_print(3, "request_json: " + pprint.pformat(request_json))
+        Debug.debug_print(3, "request_json: " + pprint.pformat(request_json))
         try:
             message = request.path
             if request.path == self.WEB_GUI_PATH:
@@ -251,8 +251,8 @@ class ZipatoRequestHandler(Settings, Debug):
             error_log.write([message])
             traceback_message = traceback.format_exc()
             error_log.write([traceback_message], date_time=False)
-            if self.debug > 0:
-                self.debug_print(1, traceback_message)
+            if Debug.debug > 0:
+                Debug.debug_print(1, traceback_message)
                 return self._json_response(traceback_message, 500)
             return self._json_response('Internal system error!', 500)
         message_log = LogFile(self.MESSAGE_LOG)
@@ -309,7 +309,7 @@ class Main(Settings):
         
         """
         args = self._parse_command_line_options()
-        Settings.debug = args.debug
+        Settings.DEBUG = Debug.DEBUG = args.debug
         if args.port is not None:
             Settings.TCP_PORT = args.port
         flask_debug = False

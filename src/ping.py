@@ -17,6 +17,7 @@ import re
 import traceback
 from settings import Settings
 from zipatoconnection import ZipatoConnection
+from debug import Debug
 from time import sleep
 from logfile import LogFile
 
@@ -102,7 +103,7 @@ class Main(Settings):
         """
         args = self._parse_command_line_options()
         Settings.load_settings_from_yaml(settings_path=self.SETTINGS_PATH)
-        Settings.DEBUG = args.debug
+        Settings.DEBUG = Debug.DEBUG = args.debug
         self._ping(args.host)
 
 if __name__ == '__main__':
