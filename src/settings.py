@@ -25,8 +25,14 @@ class Settings:
     SETTINGS_PATH = '/mnt/host/etc/'
     """(*str*) Config file path."""
 
+    PROGRAM_PATH = None
+    """(*str*) Path of the program."""
+
     __CONFIG_FILE = 'zipatoserver.conf'
     """(*str*) Config file name."""
+
+    __TEMPLATE_CONFIG_FILE = 'zipatoserver_template.conf'
+    """(*str*) Template config file name."""
 
     __PATH_WITH_SLASH_PARAMETERS = [
         'WEB_API_PATH', 'WEB_GUI_PATH', 'WAKEONLAN_PATH', 'PING_PATH',
@@ -37,26 +43,24 @@ class Settings:
         'MESSAGE_LOG', 'ERROR_LOG', 'SSH_KEY_FILE']
     """(*list*) Parameters in this list will never end with a slash."""
 
-    PROGRAM_PATH = None
-    """(*str*) Path of the program."""
-
     @staticmethod
-    def _get_config_file(settings_path, program_path):
+    def init_config_file(settings_path=None):
         """
-        Get full path and name of the YAML config file.
-        
-        :param str settings_path: Path to the YAML config file.
-        :param str program_path: Path to the program.
-        :rtype: str
-        :returns: Full path and name of the config file.
-        
+        Create a new config firl from template of there is no config file TODO
+
+        :param str settings_path: If supplied this will determine the location
+                                  of the YAML file. If not, YAML file will be
+                                  read from the current directory.
+
         """
-        if settings_path is not None:
-            config_file = Settings._format_path(settings_path)
-            config_file += Settings.__CONFIG_FILE
-        else:
-            config_file = program_path + Settings.__CONFIG_FILE
-        return config_file
+        Settings.PROGRAM_PATH = program_path = (
+            os.path.dirname(os.path.abspath(__file__)) + '/')
+        config_file = Settings._get_config_file(settings_path, program_path)
+        with open(config_file, 'r') as f:
+            constants = yaml.load(f)
+        for constant, value in constants.items():
+            setattr(
+                Settings, constant, Settings._format_value(constant, value))
 
     @staticmethod
     def load_settings_from_yaml(settings_path=None):
@@ -74,50 +78,8 @@ class Settings:
         with open(config_file, 'r') as f:
             constants = yaml.load(f)
         for constant, value in constants.items():
-            setattr(Settings, constant, Settings._format_value(constant, value))
-
-    @staticmethod
-    def _format_path(path, slash=True):
-        """
-        Format a path string.
-
-        :param str path: Path to format.
-        :param bool slash: If the path string should end with a slash
-        :rtype: str
-        :return: A formatted path string.
-
-        """
-        if len(path) == 0:
-            return path
-        elif slash and path[-1] != '/':
-            return path + '/'
-        elif not slash and path[-1] == '/':
-            return path[:-1]
-        return path
-
-    @staticmethod
-    def _format_value(param, value):
-        """
-        Format parameter value.
-
-        :param str param: Name of the parameter to format.
-        :param str param: Value to format.
-        :rtype: str or bool
-        :return: A parameter with the correct type.
-
-        """
-        if param in Settings.__PATH_WITH_SLASH_PARAMETERS:
-            return Settings._format_path(value, True)
-        elif param in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
-            return Settings._format_path(value, False)
-        elif str(value).lower() == 'yes' or str(value).lower() == 'true':
-            return True
-        elif str(value).lower() == 'no' or str(value).lower() == 'false':
-            return False
-        try:
-            return int(value)
-        except (TypeError, ValueError):
-            return value
+            setattr(
+                Settings, constant, Settings._format_value(constant, value))
 
     @staticmethod
     def render_settings_html(settings_path=None):
@@ -270,3 +232,64 @@ class Settings:
         with open(config_file+'~', 'w') as file_obj:
             file_obj.writelines(settings_yaml)
         os.rename(config_file+'~', config_file)
+
+    @staticmethod
+    def _get_config_file(settings_path, program_path):
+        """
+        Get full path and name of the YAML config file.
+
+        :param str settings_path: Path to the YAML config file.
+        :param str program_path: Path to the program.
+        :rtype: str
+        :returns: Full path and name of the config file.
+
+        """
+        if settings_path is not None:
+            config_file = Settings._format_path(settings_path)
+            config_file += Settings.__CONFIG_FILE
+        else:
+            config_file = program_path + Settings.__CONFIG_FILE
+        return config_file
+
+    @staticmethod
+    def _format_path(path, slash=True):
+        """
+        Format a path string.
+
+        :param str path: Path to format.
+        :param bool slash: If the path string should end with a slash
+        :rtype: str
+        :return: A formatted path string.
+
+        """
+        if len(path) == 0:
+            return path
+        elif slash and path[-1] != '/':
+            return path + '/'
+        elif not slash and path[-1] == '/':
+            return path[:-1]
+        return path
+
+    @staticmethod
+    def _format_value(param, value):
+        """
+        Format parameter value.
+
+        :param str param: Name of the parameter to format.
+        :param str param: Value to format.
+        :rtype: str or bool
+        :return: A parameter with the correct type.
+
+        """
+        if param in Settings.__PATH_WITH_SLASH_PARAMETERS:
+            return Settings._format_path(value, True)
+        elif param in Settings.__PATH_WITHOUT_SLASH_PARAMETERS:
+            return Settings._format_path(value, False)
+        elif str(value).lower() == 'yes' or str(value).lower() == 'true':
+            return True
+        elif str(value).lower() == 'no' or str(value).lower() == 'false':
+            return False
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return value
