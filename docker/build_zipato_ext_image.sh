@@ -27,7 +27,7 @@ do
         -h|--help)
         echo "Usage: build_zipato_extension_image.sh [-b] [-t] [-n] [-h]"
         echo -e "\nOptional arguments:"
-        echo "-b --branch:  Git branch. Default is 'zipato-extension'."
+        echo "-b --branch:  Git branch. Default is '${BRANCH}'."
         echo "-t --tag:     Docker image name. Default is 'zipato-extension'."
         echo "-n --nocache: Don't use cache when building image. Default is to\
  use cache."
