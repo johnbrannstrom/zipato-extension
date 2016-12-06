@@ -44,32 +44,22 @@ class Settings:
     """(*list*) Parameters in this list will never end with a slash."""
 
     @staticmethod
-    def init_config_file(settings_path=None):
+    def init_settings():
         """
-        Create a new config firl from template of there is no config file TODO
-
-        :param str settings_path: If supplied this will determine the location
-                                  of the YAML file. If not, YAML file will be
-                                  read from the current directory.
+        Initialize settings.
 
         """
+        # Set program path
         Settings.PROGRAM_PATH = program_path = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
-        config_file = Settings._get_config_file(settings_path, program_path)
-        with open(config_file, 'r') as f:
-            constants = yaml.load(f)
-        for constant, value in constants.items():
-            setattr(
-                Settings, constant, Settings._format_value(constant, value))
+        # Set settings path (if not already done)
+        if Settings.SETTINGS_PATH is None:
+            Settings.SETTINGS_PATH = Settings.PROGRAM_PATH
 
     @staticmethod
-    def load_settings_from_yaml(settings_path=None):
+    def load_settings_from_yaml():
         """
         Set system constants from YAML file.
-
-        :param str settings_path: If supplied this will determine the location
-                                  of the YAML file. If not, YAML file will be
-                                  read from the current directory.
 
         """
         Settings.PROGRAM_PATH = program_path = (
