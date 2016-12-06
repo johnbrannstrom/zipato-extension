@@ -308,6 +308,7 @@ class Main(Settings):
         Run the script.
         
         """
+        Settings.static_init()
         args = self._parse_command_line_options()
         Settings.DEBUG = Debug.DEBUG = args.debug
         if args.port is not None:

@@ -13,25 +13,19 @@ import yaml
 import os
 import re
 from flask import render_template
-import yaml
-import os
-import re
-from flask import render_template
+from shutil import copyfile
 
 
 class Settings:
     """Settings container."""
 
-    SETTINGS_PATH = '/mnt/host/etc/'
+    __CONFIG_PATH = '/mnt/host/etc/'
     """(*str*) Config file path."""
 
-    PROGRAM_PATH = None
-    """(*str*) Path of the program."""
-
-    __CONFIG_FILE = 'zipatoserver.conf'
+    __CONFIG_FILE_NAME = 'zipatoserver.conf'
     """(*str*) Config file name."""
 
-    __TEMPLATE_CONFIG_FILE = 'zipatoserver_template.conf'
+    __TEMPLATE_CONFIG_FILE_NAME = 'zipatoserver_template.conf'
     """(*str*) Template config file name."""
 
     __PATH_WITH_SLASH_PARAMETERS = [
@@ -43,18 +37,34 @@ class Settings:
         'MESSAGE_LOG', 'ERROR_LOG', 'SSH_KEY_FILE']
     """(*list*) Parameters in this list will never end with a slash."""
 
+    __CONFIG_FILE = None
+    """(*str*) Full path and name of config file."""
+
+    __PROGRAM_PATH = None
+    """(*str*) Path of the program."""
+
     @staticmethod
-    def init_settings():
+    def static_init():
         """
         Initialize settings.
 
         """
-        # Set program path
+        # Init program path
         Settings.PROGRAM_PATH = program_path = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
-        # Set settings path (if not already done)
+        # Init settings path
         if Settings.SETTINGS_PATH is None:
             Settings.SETTINGS_PATH = Settings.PROGRAM_PATH
+        else:
+            Settings.SETTINGS_PATH = Settings._format_path(
+                Settings.SETTINGS_PATH, True)
+        # Init config file from template if it doesn't exist
+        Settings.__CONFIG_FILE = (
+            Settings.__CONFIG_PATH + Settings.__CONFIG_FILE_NAME)
+        if not os.path.isfile(Settings.__CONFIG_FILE):
+            template_config_file = (
+                Settings.PROGRAM_PATH + Settings.__TEMPLATE_CONFIG_FILE_NAME)
+            copyfile(template_config_file, Settings.__CONFIG_FILE)
 
     @staticmethod
     def load_settings_from_yaml():
@@ -62,36 +72,26 @@ class Settings:
         Set system constants from YAML file.
 
         """
-        Settings.PROGRAM_PATH = program_path = (
-            os.path.dirname(os.path.abspath(__file__)) + '/')
-        config_file = Settings._get_config_file(settings_path, program_path)
-        with open(config_file, 'r') as f:
+        with open(Settings.__CONFIG_FILE, 'r') as f:
             constants = yaml.load(f)
         for constant, value in constants.items():
             setattr(
                 Settings, constant, Settings._format_value(constant, value))
 
     @staticmethod
-    def render_settings_html(settings_path=None):
+    def render_settings_html():
         """
         Render web GUI for handling settings.
 
-        :param str settings_path: If supplied this will determine the location
-                                  of the YAML file. If not, YAML file will be
-                                  read from the current directory.
-
         """
-        program_path = (
-            os.path.dirname(os.path.abspath(__file__)) + '/')
-        config_file = Settings._get_config_file(settings_path, program_path)
         # Load constants from disk
-        with open(config_file, 'r') as f:
+        with open(Settings.__CONFIG_FILE, 'r') as f:
             constants = yaml.load(f)
         for constant, value in constants.items():
             constants[constant] = Settings._format_value(constant, value)
         # Load comments from disk
         comments = {}
-        file = open(config_file, encoding='utf-8')
+        file = open(Settings.__CONFIG_FILE, encoding='utf-8')
         lines = file.readlines()
         for i in range(len(lines)-1, -1, -1):
             # Test/set more comments
@@ -111,74 +111,54 @@ class Settings:
             add_param_path=(Settings.WEB_API_PATH + 'add_param_value'))
 
     @staticmethod
-    def delete_param_value_from_file(param, value, settings_path=None):
+    def delete_param_value_from_file(param, value):
         """
         Remove a value from a parameter in the settings file.
 
         :param str value: Value to delete.
         :param str param: Parameter to delete value from.
-        :param str settings_path: If supplied this will determine the location
-                                  of the YAML file. If not, YAML file will be
-                                  written/read to/from the current directory.
         :rtype: boolean
         :returns: If the value was deleted from the parameter.
 
         """
-        program_path = (
-            os.path.dirname(os.path.abspath(__file__)) + '/')
-        config_file = Settings._get_config_file(settings_path, program_path)
-        with open(config_file, 'r') as f:
+        with open(Settings.__CONFIG_FILE, 'r') as f:
             settings_json = yaml.load(f)
         status = False
         if len(settings_json[param]) > 1:
             del settings_json[param][value]
             status = True
-        Settings.write_settings_to_file(
-            settings_json, settings_path=settings_path)
+        Settings.write_settings_to_file(settings_json)
         return status
 
     @staticmethod
-    def add_param_value_to_file(param, value, settings_path=None):
+    def add_param_value_to_file(param, value):
         """
         Add value to a parameter in the settings file.
 
         :param str param: Parameter to add value to.
         :param str value: Value to add.
-        :param str settings_path: If supplied this will determine the location
-                                  of the YAML file. If not, YAML file will be
-                                  written/read to/from the current directory.
 
         """
-        program_path = (
-            os.path.dirname(os.path.abspath(__file__)) + '/')
-        config_file = Settings._get_config_file(settings_path, program_path)
-        with open(config_file, 'r') as f:
+        with open(Settings.__CONFIG_FILE, 'r') as f:
             settings_json = yaml.load(f)
         blank_value = list(settings_json[param].values())[0]
         blank_value = {key: '' for key, value in blank_value.items()}
         settings_json[param][value] = blank_value
-        Settings.write_settings_to_file(settings_json,
-                                        settings_path=settings_path)
+        Settings.write_settings_to_file(settings_json)
 
     @staticmethod
-    def write_settings_to_file(settings_json, settings_path=None):
+    def write_settings_to_file(settings_json):
         """
         Write settings to file.
 
         :param dict settings_json: Settings that should be written to file.
-        :param str settings_path: If supplied this will determine the location
-                                  of the YAML file. If not, YAML file will be
-                                  written/read to/from the current directory.
 
         ..note:
 
             Comments are only supported on top level parameters.
 
         """
-        program_path = (
-            os.path.dirname(os.path.abspath(__file__)) + '/')
-        config_file = Settings._get_config_file(settings_path, program_path)
-        file_obj = open(config_file, 'r', encoding="utf-8")
+        file_obj = open(Settings.__CONFIG_FILE, 'r', encoding="utf-8")
         # Read YAML file comments from disk.
         lines = file_obj.readlines()
         file_obj.close()
@@ -219,27 +199,9 @@ class Settings:
             i += 1
         settings_yaml = '\n'.join(settings_list)[1:]
         #  Write YAML to file
-        with open(config_file+'~', 'w') as file_obj:
+        with open(Settings.__CONFIG_FILE+'~', 'w') as file_obj:
             file_obj.writelines(settings_yaml)
-        os.rename(config_file+'~', config_file)
-
-    @staticmethod
-    def _get_config_file(settings_path, program_path):
-        """
-        Get full path and name of the YAML config file.
-
-        :param str settings_path: Path to the YAML config file.
-        :param str program_path: Path to the program.
-        :rtype: str
-        :returns: Full path and name of the config file.
-
-        """
-        if settings_path is not None:
-            config_file = Settings._format_path(settings_path)
-            config_file += Settings.__CONFIG_FILE
-        else:
-            config_file = program_path + Settings.__CONFIG_FILE
-        return config_file
+        os.rename(Settings.__CONFIG_FILE+'~', Settings.__CONFIG_FILE)
 
     @staticmethod
     def _format_path(path, slash=True):
