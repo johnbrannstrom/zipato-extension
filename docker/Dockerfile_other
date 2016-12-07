@@ -37,6 +37,8 @@ sed -i 's/\PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN mkdir -p /mnt/host/var/log && \
 mkdir -p /mnt/host/etc
 COPY zipato-extension/src /usr/local/bin/zipatoserver
+COPY zipato-extension/other/zipatoserver_template.conf \
+/usr/local/bin/zipatoserver/
 RUN chmod +x /usr/local/bin/zipatoserver/zipatoserver.py && \
 chmod +x /usr/local/bin/zipatoserver/ping.py
 
