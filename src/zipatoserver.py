@@ -116,9 +116,8 @@ class ZipatoRequestHandler(Settings):
 
         """
         # Write settings to file
-        self.write_settings_to_file(
-            settings, settings_path=self.SETTINGS_PATH)
-        Settings.load_settings_from_yaml(settings_path=self.SETTINGS_PATH)
+        self.write_settings_to_file(settings)
+        Settings.load_settings_from_yaml()
         # Write all ssh key files to disk
         Main.populate_ssh_key_files()
         # Return status message
@@ -136,8 +135,8 @@ class ZipatoRequestHandler(Settings):
 
         """
         status = self.delete_param_value_from_file(
-            param, value, settings_path=self.SETTINGS_PATH)
-        Settings.load_settings_from_yaml(settings_path=self.SETTINGS_PATH)
+            param, value)
+        Settings.load_settings_from_yaml()
         if status:
             message = "Value '{}' deleted from parameter '{}'"
         else:
@@ -156,8 +155,8 @@ class ZipatoRequestHandler(Settings):
 
         """
         self.add_param_value_to_file(
-            param, value, settings_path=self.SETTINGS_PATH)
-        Settings.load_settings_from_yaml(settings_path=self.SETTINGS_PATH)
+            param, value)
+        Settings.load_settings_from_yaml()
         message = "Value '{}' added to parameter '{}'"
         message = message.format(param, value)
         return self._json_response(message, 200)
@@ -203,8 +202,7 @@ class ZipatoRequestHandler(Settings):
         try:
             message = request.path
             if request.path == self.WEB_GUI_PATH:
-                settings = self.render_settings_html(
-                    settings_path=self.SETTINGS_PATH)
+                settings = self.render_settings_html()
                 active_tab = 'about'
                 if tab is not None:
                     active_tab = tab
@@ -308,7 +306,6 @@ class Main(Settings):
         Run the script.
         
         """
-        Settings.static_init()
         args = self._parse_command_line_options()
         Settings.DEBUG = Debug.DEBUG = args.debug
         if args.port is not None:
@@ -322,8 +319,8 @@ class Main(Settings):
             port=self.TCP_PORT,
             processes=self.PROCESSES)
 
-
-Settings.load_settings_from_yaml(settings_path=Settings.SETTINGS_PATH)
+Settings.static_init()
+Settings.load_settings_from_yaml()
 Main.populate_ssh_key_files()
 zipatoserver = Flask(__name__,
                      static_url_path="",

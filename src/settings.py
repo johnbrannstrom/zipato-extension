@@ -53,11 +53,11 @@ class Settings:
         Settings.PROGRAM_PATH = program_path = (
             os.path.dirname(os.path.abspath(__file__)) + '/')
         # Init settings path
-        if Settings.SETTINGS_PATH is None:
-            Settings.SETTINGS_PATH = Settings.PROGRAM_PATH
+        if Settings.__CONFIG_PATH is None:
+            Settings.__CONFIG_PATH = Settings.PROGRAM_PATH
         else:
-            Settings.SETTINGS_PATH = Settings._format_path(
-                Settings.SETTINGS_PATH, True)
+            Settings.__CONFIG_PATH = Settings._format_path(
+                Settings.__CONFIG_PATH, True)
         # Init config file from template if it doesn't exist
         Settings.__CONFIG_FILE = (
             Settings.__CONFIG_PATH + Settings.__CONFIG_FILE_NAME)

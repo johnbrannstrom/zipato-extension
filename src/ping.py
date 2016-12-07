@@ -102,7 +102,8 @@ class Main(Settings):
         
         """
         args = self._parse_command_line_options()
-        Settings.load_settings_from_yaml(settings_path=self.SETTINGS_PATH)
+        Settings.static_init()
+        Settings.load_settings_from_yaml()
         Settings.DEBUG = Debug.DEBUG = args.debug
         self._ping(args.host)
 

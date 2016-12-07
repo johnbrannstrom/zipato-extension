@@ -52,6 +52,6 @@ COMMAND="docker create -ti --name ${NAME} -p ${PORT}:${PORT} --net=host \
 COMMAND="${COMMAND} ${IMAGE}:latest"
 echo "${COMMAND}"
 # Execute command
-eval $COMMAND
+eval ${COMMAND}
 # Start the container
 docker start ${NAME}
