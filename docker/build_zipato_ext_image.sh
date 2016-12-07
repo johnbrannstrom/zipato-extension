@@ -5,10 +5,12 @@ BRANCH="master"
 NO_CACHE=""
 TAG="zipato-extension"
 PORT="80"
+DOCKERFILE="Dockerfile_master"
+MANUAL_DOCKERFILE="False"
 while [[ $# -gt 0 ]]
 do
-    key="$1"
-    case $key in
+    KEY="$1"
+    case ${KEY} in
         -b|--branch)
         BRANCH="$2"
         shift # past argument
@@ -21,18 +23,26 @@ do
         PORT="$2"
         shift # past argument
         ;;
+        -d|--dockerfile)
+        DOCKERFILE="$2"
+        MANUAL_DOCKERFILE="True"
+        shift # past argument
+        ;;
         -n|--no-cache)
         NO_CACHE="--no-cache"
         ;;
         -h|--help)
         echo "Usage: build_zipato_extension_image.sh [-b] [-t] [-n] [-h]"
         echo -e "\nOptional arguments:"
-        echo "-b --branch:  Git branch. Default is '${BRANCH}'."
-        echo "-t --tag:     Docker image name. Default is 'zipato-extension'."
-        echo "-n --nocache: Don't use cache when building image. Default is to\
- use cache."
-        echo "-p --port:    Expose port to outside. Default value: 80"
-        echo "-h --help:    Display this help."
+        echo "-b --branch:     Git branch. Default is '${BRANCH}'."
+        echo "-t --tag:        Docker image name. Default is 'zipato-extension\
+'."
+        echo "-n --nocache:    Don't use cache when building image. Default is\
+ to use cache."
+        echo "-p --port:       Expose port to outside. Default value: 80"
+        echo "-d --dockerfile: Specifies what Dockerfile to use. Default is \
+'${DOCKERFILE}'".
+        echo "-h --help:       Display this help."
         echo ""
         exit 0
         ;;
@@ -44,8 +54,7 @@ do
 done
 
 # Select dockerfile
-DOCKERFILE="Dockerfile_master"
-if [ "$BRANCH" != "master" ]; then
+if [ "$BRANCH" != "master" ] && [ "$MANUAL_DOCKERFILE" == "False" ]; then
     DOCKERFILE="Dockerfile_other"
 fi
 
