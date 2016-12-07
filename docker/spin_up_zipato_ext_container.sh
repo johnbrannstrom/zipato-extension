@@ -1,7 +1,7 @@
 #!/bin/bash
 # Parse command line options
+NAME=""
 IMAGE="zipato-extension"
-NAME="${IMAGE}"
 PORT="80"
 while [[ $# -gt 0 ]]
 do
@@ -36,6 +36,9 @@ do
     esac
     shift # past argument or value
 done
+if [ "${NAME}" == "" ]; then
+    NAME="${IMAGE}"
+fi
 
 # Delete old container
 docker stop "$NAME"
@@ -49,6 +52,6 @@ COMMAND="docker create -ti --name ${NAME} -p ${PORT}:${PORT} --net=host \
 COMMAND="${COMMAND} ${IMAGE}:latest"
 echo "${COMMAND}"
 # Execute command
-eval ${COMMAND}
+eval $COMMAND
 # Start the container
 docker start ${NAME}
