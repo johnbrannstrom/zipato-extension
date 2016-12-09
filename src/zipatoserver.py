@@ -287,7 +287,7 @@ class Main(Settings):
 
         :raises: ZipatoError
 
-        """ TODO
+        """ # TODO copy of restart ping wihich should be rewritten
         ping_commands = []
         for host in self.PING_HOSTS:
             ping_command = '{} /usr/bin/python3 {}ping.py --host {} >> {} 2>&1'
