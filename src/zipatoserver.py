@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import subprocess
+import pprint
 import argparse
 import traceback
 import json
@@ -18,7 +19,8 @@ from debug import Debug
 from error import ZipatoError
 
 
-class ZipatoServer(Settings, Debug):
+# noinspection PyUnresolvedReferences
+class ZipatoRequestHandler(Settings):
     """Zipato extension web server."""
 
     @staticmethod
@@ -40,6 +42,7 @@ class ZipatoServer(Settings, Debug):
         return Response(
             json_message, status=status_code, mimetype='application/json')
 
+    # noinspection PyGlobalUndefined,PyUnboundLocalVariable
     def _poweron(self):
         """
         Start remote node with a wake on LAN packet.
@@ -57,10 +60,10 @@ class ZipatoServer(Settings, Debug):
             return self._json_response(message, 400)
         # Power on node
         if host is not None:
-            command = "{}wakeonlan -i {} {}"
+            command = "{}etherwake -i {} {}"
             command = command.format(self.WAKEONLAN_PATH, host, mac)
         else:
-            command = "{}wakeonlan {}".format(self.WAKEONLAN_PATH, mac)
+            command = "{}etherwake {}".format(self.WAKEONLAN_PATH, mac)
         for i in range(3):
             p = subprocess.Popen(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -70,6 +73,7 @@ class ZipatoServer(Settings, Debug):
         message = codecs.decode(stdout + stderr, 'utf-8')
         return self._json_response(message, 200)
 
+    # noinspection PyShadowingNames
     def _poweroff(self):
         """
         Log on to remote node and shut it down.
@@ -89,9 +93,11 @@ class ZipatoServer(Settings, Debug):
             message = message.format(host)
             return self._json_response(message, 400)
         # Power off node
-        command = "{}ssh -i {} -T {}@{} 'shutdown -h now'"
-        ssh_key_file = self.API_POWEROFF_HOSTS[host]['ssh_key_file']
+        command = ("{}ssh -o 'StrictHostKeyChecking no' -i {} -T {}@{} 'shutdo"
+                   "wn -h now'")
+        ssh_key_file = self.SSH_KEY_FILE.replace('$HOST', host)
         command = command.format(self.SSH_PATH, ssh_key_file, user, host)
+        Debug.debug_print(1, 'Shut down command: {}'.format(command))
         p = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             shell=True)
@@ -109,8 +115,12 @@ class ZipatoServer(Settings, Debug):
         :returns: Status message
 
         """
-        self.write_settings_to_file(settings, settings_path='/etc/')
-        Settings.load_settings_from_yaml(settings_path='/etc/')
+        # Write settings to file
+        self.write_settings_to_file(settings)
+        Settings.load_settings_from_yaml()
+        # Write all ssh key files to disk
+        Main.populate_ssh_key_files()
+        # Return status message
         message = 'Settings written to file'
         return self._json_response(message, 200)
 
@@ -125,8 +135,8 @@ class ZipatoServer(Settings, Debug):
 
         """
         status = self.delete_param_value_from_file(
-            param, value, settings_path='/etc/')
-        Settings.load_settings_from_yaml(settings_path='/etc/')
+            param, value)
+        Settings.load_settings_from_yaml()
         if status:
             message = "Value '{}' deleted from parameter '{}'"
         else:
@@ -144,12 +154,14 @@ class ZipatoServer(Settings, Debug):
         :returns: Status message
 
         """
-        self.add_param_value_to_file(param, value, settings_path='/etc/')
-        Settings.load_settings_from_yaml(settings_path='/etc/')
+        self.add_param_value_to_file(
+            param, value)
+        Settings.load_settings_from_yaml()
         message = "Value '{}' added to parameter '{}'"
         message = message.format(param, value)
         return self._json_response(message, 200)
 
+    # noinspection PyShadowingNames
     def _restart_ping(self):
         """
         Create a new crontab with ping commands
@@ -179,16 +191,18 @@ class ZipatoServer(Settings, Debug):
         message = 'Crontab updated'
         return self._json_response(message, 200)
 
+    # noinspection PyUnboundLocalVariable
     def handle_request(self):
         """Web server function."""
         host = request.args.get('host')
         mac = request.args.get('mac')
         tab = request.args.get('tab')
-        response_json = request.get_json()
+        request_json = request.get_json()
+        Debug.debug_print(3, "request_json: " + pprint.pformat(request_json))
         try:
             message = request.path
             if request.path == self.WEB_GUI_PATH:
-                settings = self.render_settings_html(settings_path='/etc/')
+                settings = self.render_settings_html()
                 active_tab = 'about'
                 if tab is not None:
                     active_tab = tab
@@ -210,23 +224,23 @@ class ZipatoServer(Settings, Debug):
                 result = self._restart_ping()
             elif request.path == self.WEB_API_PATH + 'save_settings':
                 message = 'save_settings'
-                result = self._save_settings(response_json)
+                result = self._save_settings(request_json)
             elif request.path == self.WEB_API_PATH + 'delete_param_value':
                 param = None
                 value = None
-                if 'param' in response_json:
-                    param = response_json['param']
-                if 'value' in response_json:
-                    value = response_json['value']
+                if 'param' in request_json:
+                    param = request_json['param']
+                if 'value' in request_json:
+                    value = request_json['value']
                 message = 'delete_param_value: param={}, value={}'
                 message = message.format(param, value)
                 result = self._delete_param_value(param, value)
             elif request.path == self.WEB_API_PATH + 'add_param_value':
                 param = None
-                if 'param' in response_json:
-                    param = response_json['param']
-                if 'value' in response_json:
-                    value = response_json['value']
+                if 'param' in request_json:
+                    param = request_json['param']
+                if 'value' in request_json:
+                    value = request_json['value']
                 message = 'add_param_value: param={}, value={}'
                 message = message.format(param, value)
                 result = self._add_param_value(param, value)
@@ -235,7 +249,8 @@ class ZipatoServer(Settings, Debug):
             error_log.write([message])
             traceback_message = traceback.format_exc()
             error_log.write([traceback_message], date_time=False)
-            if self.DEBUG > 0:
+            if Debug.debug > 0:
+                Debug.debug_print(1, traceback_message)
                 return self._json_response(traceback_message, 500)
             return self._json_response('Internal system error!', 500)
         message_log = LogFile(self.MESSAGE_LOG)
@@ -255,20 +270,46 @@ class Main(Settings):
 
         """
         debug_help = 'Debugging printout level.'
+        port_help = 'Port the web server runs on.'
         description = 'Start Zipato extension web server.'
         parser = argparse.ArgumentParser(description=description)
         parser.add_argument('--debug', type=int, default=0,
                             help=debug_help, required=False)
+        parser.add_argument('-p', '--port', type=int,
+                            help=port_help, required=False)
         args = parser.parse_args()
         return args
 
+    @staticmethod
+    def populate_ssh_key_files():
+        """
+        Read all ssh key file contents from settings and write ssh key file(s)
+        to disk for SSH to use.
+
+        """
+        for host, values in Settings.API_POWEROFF_HOSTS.items():
+            file_name = Settings.SSH_KEY_FILE.replace('$HOST', host)
+            file_obj = open(file_name, 'w')
+            file_obj.writelines(values['ssh_key'])
+            file_obj.close()
+            command = "chmod 0600 {}".format(file_name)
+            p = subprocess.Popen(
+                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True)
+            p.communicate()
+        message = "The following ssh key files have been written to disk:\n{}"
+        Debug.debug_print(
+            2, message.format(str(Settings.API_POWEROFF_HOSTS.keys())))
+
     def run(self):
         """
-        Run the script
+        Run the script.
         
         """
         args = self._parse_command_line_options()
-        Settings.DEBUG = args.debug
+        Settings.DEBUG = Debug.DEBUG = args.debug
+        if args.port is not None:
+            Settings.TCP_PORT = args.port
         flask_debug = False
         if args.debug > 0:
             flask_debug = True
@@ -278,8 +319,9 @@ class Main(Settings):
             port=self.TCP_PORT,
             processes=self.PROCESSES)
 
-
-Settings.load_settings_from_yaml(settings_path='/etc/')
+Settings.static_init()
+Settings.load_settings_from_yaml()
+Main.populate_ssh_key_files()
 zipatoserver = Flask(__name__,
                      static_url_path="",
                      static_folder='html_static',
@@ -296,8 +338,8 @@ zipatoserver = Flask(__name__,
 @zipatoserver.route(Settings.WEB_API_PATH + 'add_param_value', methods=['PUT'])
 def index():
     """Handle incoming HTTP requests."""
-    web_server = ZipatoServer()
-    return web_server.handle_request()
+    request_handler = ZipatoRequestHandler()
+    return request_handler.handle_request()
 
 if __name__ == '__main__':
     main = Main()

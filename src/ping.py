@@ -17,6 +17,7 @@ import re
 import traceback
 from settings import Settings
 from zipatoconnection import ZipatoConnection
+from debug import Debug
 from time import sleep
 from logfile import LogFile
 
@@ -43,7 +44,7 @@ class Main(Settings):
             message = (
                 "ping: host={}, Host has not been configured for ping")
             message = message.format(host)
-            message_log.write(message)
+            message_log.write([message])
             return None
         try:
             for i in range(self.PING_COUNT):
@@ -70,11 +71,11 @@ class Main(Settings):
         except:
             error_log = LogFile(self.ERROR_LOG)
             message = 'ping: host={}'.format(host)
-            error_log.write(message)
+            error_log.write([message])
             traceback_message = traceback.format_exc()
-            error_log.write(traceback_message, date_time=False)
+            error_log.write([traceback_message], date_time=False)
         message = "ping: host={}, status={}".format(host, status)
-        message_log.write(message)
+        message_log.write([message])
 
     @staticmethod
     def _parse_command_line_options():
@@ -101,8 +102,9 @@ class Main(Settings):
         
         """
         args = self._parse_command_line_options()
-        Settings.load_settings_from_yaml(settings_path='/etc/')
-        Settings.DEBUG = args.debug
+        Settings.static_init()
+        Settings.load_settings_from_yaml()
+        Settings.DEBUG = Debug.DEBUG = args.debug
         self._ping(args.host)
 
 if __name__ == '__main__':

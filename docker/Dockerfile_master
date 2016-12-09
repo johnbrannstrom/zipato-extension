@@ -1,0 +1,52 @@
+# Dockefile for Zipato-extension master branch
+FROM ubuntu:16.04
+
+ARG PORT
+ARG TAG
+
+# Install packages
+RUN apt-get update && \
+    apt-get -y install python3-pip cron etherwake ssh-client iputils-ping \
+    --no-install-recommends && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends \
+    install && \
+    pip3 install --upgrade pip && \
+    pip3 install setuptools && \
+    pip3 install pyyaml flask requests && \
+    apt-get remove -y python3-pip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Set timezone and prompt
+RUN  rm /etc/localtime && \
+ln -s /usr/share/zoneinfo/Europe/Stockholm /etc/localtime && \
+echo "export PS1=\"\u@${TAG}# \"" >> /root/.bashrc
+
+# Terminal
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+# Prepare environment for zipato-extension and copy program to image
+RUN mkdir -p /mnt/host/var/log && \
+mkdir -p /mnt/host/etc
+COPY zipato-extension/src /usr/local/bin/zipatoserver
+COPY zipato-extension/other/zipatoserver_template.conf \
+/usr/local/bin/zipatoserver/
+RUN chmod +x /usr/local/bin/zipatoserver/zipatoserver.py && \
+chmod +x /usr/local/bin/zipatoserver/ping.py
+
+# Add programs for autostart
+RUN touch "/tmp/start_services.sh" && \
+    chmod +x "/tmp/start_services.sh" && \
+    echo "#!/bin/bash" >> "/tmp/start_services.sh" && \
+    echo "cron" >> "/tmp/start_services.sh" \
+    >> "/tmp/start_services.sh" && \
+    touch "/tmp/start_main.sh" && \
+    chmod +x "/tmp/start_main.sh" && \
+    echo "#!/bin/bash" >> "/tmp/start_main.sh" && \
+    echo "/tmp/start_services.sh" >> "/tmp/start_main.sh" && \
+    echo "/usr/local/bin/zipatoserver/zipatoserver.py -p ${PORT}" \
+    >> "/tmp/start_main.sh"
+CMD ["/bin/bash", "/tmp/start_main.sh"]
