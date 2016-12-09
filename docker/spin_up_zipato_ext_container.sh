@@ -3,6 +3,7 @@
 NAME=""
 IMAGE="zipato-extension"
 PORT="80"
+SSH=""
 while [[ $# -gt 0 ]]
 do
     key="$1"
@@ -19,6 +20,9 @@ do
         PORT="$2"
         shift # past argument
         ;;
+        -s|--ssh)
+        SSH="-p 23:23"
+        ;;
         -h|--help)
         echo "Usage: spin_up_zipato_ext_container.sh [-i] [-p] [-h]"
         echo -e "\nOptional arguments:"
@@ -26,6 +30,7 @@ do
         echo "            Default value: zipato-extension."
         echo "-n --name:  Container name. Default value is same as image name."
         echo "-p --port:  Expose port to outside. Default value: 80"
+        echo "-s --ssh:   Expose SSH on port 23."
         echo "-h --help:  Display this help."
         echo ""
         exit 0
@@ -44,9 +49,8 @@ fi
 docker stop "$NAME"
 docker rm "$NAME"
 # Create the create new container command
-COMMAND="docker create -ti --name ${NAME} -p ${PORT}:${PORT} --net=host \
--p 23:23 \
--v /var/log:/mnt/host/var/log \
+COMMAND="docker create -ti --name ${NAME} -p ${PORT}:${PORT} --net=host ${SSH}\
+ -v /var/log:/mnt/host/var/log \
 -v /etc:/mnt/host/etc"
 # Add the image to the command
 COMMAND="${COMMAND} ${IMAGE}:latest"
