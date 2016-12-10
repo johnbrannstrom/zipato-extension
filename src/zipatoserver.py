@@ -170,24 +170,7 @@ class ZipatoRequestHandler(Settings):
         :returns: Status message
 
         """
-        ping_commands = []
-        for host in self.PING_HOSTS:
-            ping_command = '{} /usr/bin/python3 {}ping.py --host {} >> {} 2>&1'
-            ping_command = ping_command.format(self.PING_SCHEDULE,
-                                               self.PROGRAM_PATH,
-                                               copy(host),
-                                               self.ERROR_LOG)
-            ping_commands.append(copy(ping_command))
-        cron_lines = '\n'.join(ping_commands)
-        cron_command = '(echo "{}") | crontab -'.format(cron_lines)
-        p = subprocess.Popen(
-            cron_command, stdout=subprocess.PIPE, shell=True)
-        stdout, stderr = p.communicate()
-        if stderr is not None:
-            message = (
-                'Error updating crontab!\nStandard in:\n{}\nStandard out:\n{}')
-            message = message.format(str(stdout), str(stderr))
-            raise ZipatoError(message)
+        Main.update_ping_crontab()
         message = 'Crontab updated'
         return self._json_response(message, 200)
 
@@ -270,9 +253,14 @@ class Main(Settings):
 
         """
         debug_help = 'Debugging printout level.'
+        no_ping = ('If this option is supplied, no ping cron jobs will be adde'
+                   'd att container start.')
         port_help = 'Port the web server runs on.'
         description = 'Start Zipato extension web server.'
         parser = argparse.ArgumentParser(description=description)
+        parser.add_argument('-n', '--no_ping', dest='ping',
+                            action='store_false', help=no_ping)
+        parser.set_defaults(ping=True)
         parser.add_argument('--debug', type=int, default=0,
                             help=debug_help, required=False)
         parser.add_argument('-p', '--port', type=int,
@@ -287,14 +275,14 @@ class Main(Settings):
 
         :raises: ZipatoError
 
-        """ # TODO copy of restart ping wihich should be rewritten
+        """
         ping_commands = []
-        for host in self.PING_HOSTS:
+        for host in Settings.PING_HOSTS:
             ping_command = '{} /usr/bin/python3 {}ping.py --host {} >> {} 2>&1'
-            ping_command = ping_command.format(self.PING_SCHEDULE,
-                                               self.PROGRAM_PATH,
+            ping_command = ping_command.format(Settings.PING_SCHEDULE,
+                                               Settings.PROGRAM_PATH,
                                                copy(host),
-                                               self.ERROR_LOG)
+                                               Settings.ERROR_LOG)
             ping_commands.append(copy(ping_command))
         cron_lines = '\n'.join(ping_commands)
         cron_command = '(echo "{}") | crontab -'.format(cron_lines)
@@ -306,9 +294,6 @@ class Main(Settings):
                 'Error updating crontab!\nStandard in:\n{}\nStandard out:\n{}')
             message = message.format(str(stdout), str(stderr))
             raise ZipatoError(message)
-        message = 'Crontab updated'
-        return self._json_response(message, 200)
-
 
     @staticmethod
     def populate_ssh_key_files():
@@ -336,8 +321,13 @@ class Main(Settings):
         Run the script.
         
         """
+        Settings.static_init()
+        Settings.load_settings_from_yaml()
+        self.populate_ssh_key_files()
         args = self._parse_command_line_options()
         Settings.DEBUG = Debug.DEBUG = args.debug
+        if args.ping:
+            self.update_ping_crontab()
         if args.port is not None:
             Settings.TCP_PORT = args.port
         flask_debug = False
@@ -349,9 +339,6 @@ class Main(Settings):
             port=self.TCP_PORT,
             processes=self.PROCESSES)
 
-Settings.static_init()
-Settings.load_settings_from_yaml()
-Main.populate_ssh_key_files()
 zipatoserver = Flask(__name__,
                      static_url_path="",
                      static_folder='html_static',
