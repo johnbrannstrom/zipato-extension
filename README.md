@@ -17,4 +17,4 @@ Installation instructions
   docker pull johnbrannstrom/zipato-extension
   ```
 
-* Start a container with the image by running the script. [spin_up_zipato_ext_container.sh](docker/spin_up_zipato_ext_container.sh)
+* Start a container with the image by running the script. [spin_up_zipato_ext_container.sh](https://raw.githubusercontent.com/johnbrannstrom/zipato-extension/master/docker/spin_up_zipato_ext_container.sh)
