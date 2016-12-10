@@ -268,6 +268,7 @@ class Main(Settings):
         args = parser.parse_args()
         return args
 
+    # noinspection PyShadowingNames
     @staticmethod
     def update_ping_crontab():
         """
@@ -321,8 +322,6 @@ class Main(Settings):
         Run the script.
         
         """
-        Settings.static_init()
-        Settings.load_settings_from_yaml()
         self.populate_ssh_key_files()
         args = self._parse_command_line_options()
         Settings.DEBUG = Debug.DEBUG = args.debug
@@ -343,6 +342,8 @@ zipatoserver = Flask(__name__,
                      static_url_path="",
                      static_folder='html_static',
                      template_folder='html_templates')
+Settings.static_init()
+Settings.load_settings_from_yaml()
 
 
 @zipatoserver.route(Settings.WEB_GUI_PATH)
