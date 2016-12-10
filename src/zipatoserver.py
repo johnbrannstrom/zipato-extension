@@ -355,7 +355,10 @@ Settings.load_settings_from_yaml()
                     methods=['DELETE'])
 @zipatoserver.route(Settings.WEB_API_PATH + 'add_param_value', methods=['PUT'])
 def index():
-    """Handle incoming HTTP requests."""
+    """
+    Handle incoming HTTP requests.
+
+    """
     request_handler = ZipatoRequestHandler()
     return request_handler.handle_request()
 
