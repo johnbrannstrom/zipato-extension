@@ -53,7 +53,7 @@ COMMAND="docker create -ti --name ${NAME} -p ${PORT}:${PORT} --net=host ${SSH}\
  -v /var/log:/mnt/host/var/log \
 -v /etc:/mnt/host/etc"
 # Add the image to the command
-COMMAND="${COMMAND} ${IMAGE}:latest"
+COMMAND="${COMMAND} johnbrannstrom/${IMAGE}:latest"
 echo "${COMMAND}"
 # Execute command
 eval ${COMMAND}
