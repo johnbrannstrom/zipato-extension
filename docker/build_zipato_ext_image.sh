@@ -59,9 +59,9 @@ if [ "$BRANCH" != "master" ] && [ "$MANUAL_DOCKERFILE" == "False" ]; then
 fi
 
 # Build image
-git clone https://github.com/johnbrannstrom/zipato-extension -b ${BRANCH} \
+git clone https://github.com/zipato-extension -b ${BRANCH} \
     --single-branch zipato-extension
-docker build . -t johnbrannstrom/${TAG} ${NO_CACHE} -f ${DOCKERFILE} \
+docker build . -t ${TAG} ${NO_CACHE} -f ${DOCKERFILE} \
 --build-arg PORT=${PORT} \
 --build-arg TAG=${TAG}
 rm -Rf zipato-extension
