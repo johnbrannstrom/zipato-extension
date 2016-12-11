@@ -7,7 +7,7 @@ Features
 Environment requirements
 ------------------------
 
-* Docker 1.12.2 on Linux
+* Tested on docker 1.12.2 on Linux
 
 Installation instructions
 ------------------------
